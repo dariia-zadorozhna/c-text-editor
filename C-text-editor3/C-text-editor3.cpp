@@ -10,6 +10,8 @@ int main() {
     char* input = 0;
     const size_t bufferSize = 256;
     int numberOfRaws = 1;
+    int LineNewLength = 0;
+    int currentLineNum = 0;
 
     input = (char*)malloc(bufferSize * sizeof(char));
 
@@ -30,6 +32,9 @@ int main() {
             case '1':
                 printf("Enter text to append:\n");
                 get_input(input, bufferSize);
+                LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
+                text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
+                strcat_s(text[currentLineNum], LineNewLength, input);
                 break;
             case '2':
                 printf("New line is started\n");
