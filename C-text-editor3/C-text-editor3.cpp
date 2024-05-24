@@ -81,6 +81,16 @@ int main() {
                 break;
             case '5':
                 printf("The current text is:\n");
+                for (int i = 0; i < numberOfRaws; i++) {
+                    for (int j = 0; j < bufferSize; j++)
+                    {
+                        if (text[i][j] == '\0') {
+                            printf("\n");
+                            break;
+                        }
+                        printf("%c", text[i][j]);
+                    }
+                }
                 break;
             case '6':
                 printf("Choose line and index:\n");
