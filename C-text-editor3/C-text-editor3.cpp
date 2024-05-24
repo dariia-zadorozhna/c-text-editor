@@ -12,6 +12,9 @@ int main() {
     int numberOfRaws = 1;
     int LineNewLength = 0;
     int currentLineNum = 0;
+    int matches = 0;
+    int match = 0;
+    int substringLen = 0;
 
     char* temporary = (char*)calloc(bufferSize, sizeof(char));
 
@@ -112,6 +115,28 @@ int main() {
             case '7':
                 printf("Enter text to search:\n");
                 get_input(input, bufferSize);
+                substringLen = strlen(input);
+                for (int i = 0; i < numberOfRaws; i++)
+                {
+                    char* currentLine = text[i];
+                    int lineLen = strlen(currentLine);
+
+                    for (int j = 0; j <= lineLen - substringLen; j++)
+                    {
+                        match = 1;
+                        for (int l = 0; l < substringLen; l++)
+                        {
+                            if (currentLine[j + l] != input[l])
+                            {
+                                match = 0;
+                            }
+                        }
+                        if (match) {
+                            matches += 1;
+                        }
+                    }
+                }
+                printf("Your matches are: %d\n", matches);
                 break;
             case '8':
                 printf("Exiting...\n");
