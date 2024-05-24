@@ -46,6 +46,17 @@ int main() {
             case '3':
                 printf("Enter the file name for saving: \n");
                 get_input(input, bufferSize);
+
+                FILE* file;
+
+                fopen_s(&file, input, "w");
+                if (file != NULL) {
+                    for (int i = 0; i < numberOfRaws; i++) {
+                        fputs(text[i], file);
+                        fputs("\n", file);
+                    }
+                }
+                fclose(file);
                 break;
             case '4':
                 printf("Enter the file name for loading:\n");
