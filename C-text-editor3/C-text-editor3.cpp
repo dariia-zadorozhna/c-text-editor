@@ -38,6 +38,10 @@ int main() {
                 break;
             case '2':
                 printf("New line is started\n");
+                numberOfRaws++;
+                currentLineNum++;
+                text = (char**)realloc(text, numberOfRaws * sizeof(char*));
+                text[currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
                 break;
             case '3':
                 printf("Enter the file name for saving: \n");
