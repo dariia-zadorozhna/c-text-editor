@@ -13,6 +13,8 @@ int main() {
     int LineNewLength = 0;
     int currentLineNum = 0;
 
+    char* temporary = (char*)calloc(bufferSize, sizeof(char));
+
     input = (char*)malloc(bufferSize * sizeof(char));
 
     if (input == NULL) {
@@ -93,7 +95,19 @@ int main() {
                 }
                 break;
             case '6':
+                int line, index;
                 printf("Choose line and index:\n");
+                scanf_s("%d %d", &line, &index);
+                getchar();
+                printf("Enter text to insert:\n");
+                get_input(input, bufferSize);
+                strcpy_s(temporary, bufferSize, text[line - 1]);
+                temporary[index] = '\0';
+                strcat_s(temporary, bufferSize, input);
+                strcat_s(temporary, bufferSize, text[line - 1] + index);
+                text[line - 1] = (char*)calloc(bufferSize, sizeof(char));
+                strcpy_s(text[line - 1], bufferSize, temporary);
+                printf("New line is: %s\n", text[line - 1]);
                 break;
             case '7':
                 printf("Enter text to search:\n");
