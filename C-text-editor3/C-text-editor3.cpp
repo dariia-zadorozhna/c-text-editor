@@ -144,6 +144,7 @@ int main() {
             default:
                 printf("Invalid command. Try again:\n");
             }
+            system("CLS");
         }
 
     }
