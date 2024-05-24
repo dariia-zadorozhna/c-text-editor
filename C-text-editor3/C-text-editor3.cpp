@@ -5,6 +5,7 @@
 
 void print_commands();
 char* get_input(char* input, int bufferSize);
+void append_text(int LineNewLength, char* input, char** text, int currentLineNum);
 
 int main() {
     char* input = 0;
@@ -38,9 +39,7 @@ int main() {
                 system("CLS");
                 printf("Enter text to append:\n");
                 get_input(input, bufferSize);
-                LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
-                text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
-                strcat_s(text[currentLineNum], LineNewLength, input);
+                append_text(LineNewLength,input,text,currentLineNum);
                 break;
             case '2':
                 system("CLS");
@@ -181,5 +180,11 @@ char* get_input(char* input, int bufferSize) {
     fgets(input, bufferSize, stdin);
     input[strcspn(input, "\n")] = '\0';
     return input;
+}
+
+void append_text(int LineNewLength, char*input, char** text, int currentLineNum) {
+    LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
+    text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
+    strcat_s(text[currentLineNum], LineNewLength, input);
 }
 
