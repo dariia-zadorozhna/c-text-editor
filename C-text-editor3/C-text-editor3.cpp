@@ -35,6 +35,7 @@ int main() {
         {
             switch (input[0]) {
             case '1':
+                system("CLS");
                 printf("Enter text to append:\n");
                 get_input(input, bufferSize);
                 LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
@@ -42,6 +43,7 @@ int main() {
                 strcat_s(text[currentLineNum], LineNewLength, input);
                 break;
             case '2':
+                system("CLS");
                 printf("New line is started\n");
                 numberOfRaws++;
                 currentLineNum++;
@@ -49,6 +51,7 @@ int main() {
                 text[currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
                 break;
             case '3':
+                system("CLS");
                 printf("Enter the file name for saving: \n");
                 get_input(input, bufferSize);
 
@@ -64,6 +67,7 @@ int main() {
                 fclose(file);
                 break;
             case '4':
+                system("CLS");
                 printf("Enter the file name for loading:\n");
                 get_input(input, bufferSize);
                 char mystring[bufferSize];
@@ -85,6 +89,7 @@ int main() {
                 }
                 break;
             case '5':
+                system("CLS");
                 printf("The current text is:\n");
                 for (int i = 0; i < numberOfRaws; i++) {
                     for (int j = 0; j < bufferSize; j++)
@@ -98,6 +103,7 @@ int main() {
                 }
                 break;
             case '6':
+                system("CLS");
                 int line, index;
                 printf("Choose line and index:\n");
                 scanf_s("%d %d", &line, &index);
@@ -113,6 +119,7 @@ int main() {
                 printf("New line is: %s\n", text[line - 1]);
                 break;
             case '7':
+                system("CLS");
                 printf("Enter text to search:\n");
                 get_input(input, bufferSize);
                 substringLen = strlen(input);
@@ -129,6 +136,7 @@ int main() {
                             if (currentLine[j + l] != input[l])
                             {
                                 match = 0;
+                                break;
                             }
                         }
                         if (match) {
@@ -139,12 +147,19 @@ int main() {
                 printf("Your matches are: %d\n", matches);
                 break;
             case '8':
+                system("CLS");
                 printf("Exiting...\n");
+                for (int i = 0; i < numberOfRaws; i++)
+                {
+                    (text[i]);
+                }
+                free(input);
+                free(text);
+                free(temporary);
                 return 0;
             default:
                 printf("Invalid command. Try again:\n");
             }
-            system("CLS");
         }
 
     }
