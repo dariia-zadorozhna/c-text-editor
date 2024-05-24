@@ -61,6 +61,23 @@ int main() {
             case '4':
                 printf("Enter the file name for loading:\n");
                 get_input(input, bufferSize);
+                char mystring[bufferSize];
+
+                fopen_s(&file, input, "r");
+                if (file == NULL) {
+                    printf("Error opening file!");
+                }
+                else {
+                    while (fgets(mystring, bufferSize, file))
+                    {
+                        mystring[strcspn(mystring, "\n")] = '\0';
+                        text = (char**)realloc(text, (numberOfRaws + 1) * sizeof(char*));
+                        text[numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
+                        strcpy_s(text[numberOfRaws], bufferSize, mystring);
+                        numberOfRaws++;
+                    }
+                    fclose(file);
+                }
                 break;
             case '5':
                 printf("The current text is:\n");
