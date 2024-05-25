@@ -6,6 +6,8 @@
 void print_commands();
 char* get_input(char* input, int bufferSize);
 void append_text(int LineNewLength, char* input, char** text, int currentLineNum);
+void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize);
+
 
 int main() {
     char* input = 0;
@@ -42,12 +44,7 @@ int main() {
                 append_text(LineNewLength,input,text,currentLineNum);
                 break;
             case '2':
-                system("CLS");
-                printf("New line is started\n");
-                numberOfRaws++;
-                currentLineNum++;
-                text = (char**)realloc(text, numberOfRaws * sizeof(char*));
-                text[currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
+                start_new_line(&text, &numberOfRaws, &currentLineNum, bufferSize);
                 break;
             case '3':
                 system("CLS");
@@ -140,10 +137,12 @@ int main() {
                         }
                         if (match) {
                             matches += 1;
+                            printf("Text is present at this position: %d %d\n", i, j);
                         }
                     }
                 }
-                printf("Your matches are: %d\n", matches);
+                printf("Number of matches: %d\n", matches);
+                matches = 0;
                 break;
             case '8':
                 system("CLS");
@@ -160,7 +159,6 @@ int main() {
                 printf("Invalid command. Try again:\n");
             }
         }
-
     }
     return 0;
 }
@@ -186,5 +184,14 @@ void append_text(int LineNewLength, char*input, char** text, int currentLineNum)
     LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
     text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
     strcat_s(text[currentLineNum], LineNewLength, input);
+}
+
+void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize) {
+    system("CLS");
+    printf("New line is started\n");
+    (*numberOfRaws)++;
+    (*currentLineNum)++;
+    *text = (char**)realloc(*text, (*numberOfRaws) * sizeof(char*));
+    (*text)[*currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
 }
 
