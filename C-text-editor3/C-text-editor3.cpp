@@ -8,7 +8,7 @@ char* get_input(char* input, int bufferSize);
 void append_text(int LineNewLength, char* input, char** text, int currentLineNum,int bufferSize);
 void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize);
 void save_to_file(char** text, int numberOfRaws,char* input,int bufferSize);
-void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input);
+void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input, int* currentLineNum);
 void print_to_console(int numberOfRaws, int bufferSize, char** text);
 void insert_text(char* temporary, int bufferSize, char** text, int line, int index, char* input);
 void search(int substringLen, char* input, int numberOfRaws, int match_bool, char** text, int matches_num,int bufferSize);
@@ -37,8 +37,11 @@ int main() {
     char** text = (char**)calloc(numberOfRaws, sizeof(char*));
     text[0] = (char*)calloc(bufferSize, sizeof(char));
 
+    print_commands();
+
     while (1) {
-        print_commands();
+        /*print_commands();*/
+        printf("Type in the next command:\n");
         get_input(input, bufferSize);
         if (strlen(input) == 1)
         {
@@ -53,23 +56,32 @@ int main() {
                 save_to_file(text, numberOfRaws, input,bufferSize);
                 break;
             case '4':
-                load_from_file(&text,mystring,bufferSize,&numberOfRaws,input);
+                load_from_file(&text,mystring,bufferSize,&numberOfRaws,input, &currentLineNum);
                 break;
             case '5':
                 print_to_console(numberOfRaws, bufferSize, text);
                 break;
             case '6':
-                system("CLS");
+                /*system("CLS");*/
                 printf("Choose line and index:\n");
-                scanf_s("%d %d", &line, &index);
-                getchar();
-                insert_text(temporary,bufferSize,text,line,index,input);
+                if (scanf_s("%d %d", &line, &index) == 2) {
+                    getchar();
+                    if (line <= numberOfRaws && line >= 0 && index >= 0) {
+                        insert_text(temporary, bufferSize, text, line, index, input);
+                    }
+                    else {
+                        printf("This line does not exist yet or the index is wrong.\n");
+                    }
+                }
+                else {
+                    printf("The entered line and index are incorrect.\n");
+                }
                 break;
             case '7':
                 search(substringLen,input,numberOfRaws, match_bool, text,matches_num,bufferSize);
                 break;
             case '8':
-                system("CLS");
+                /*system("CLS");*/
                 printf("Exiting...\n");
                 for (int i = 0; i < numberOfRaws; i++)
                 {
@@ -82,6 +94,10 @@ int main() {
             default:
                 printf("Invalid command. Try again:\n");
             }
+        }
+        else {
+            /*system("CLS");*/
+            printf("The command is invalid. Try again!\n");
         }
     }
     return 0;
@@ -105,7 +121,7 @@ char* get_input(char* input, int bufferSize) {
 }
 
 void append_text(int LineNewLength, char*input, char** text, int currentLineNum,int bufferSize) {
-    system("CLS");
+   /* system("CLS");*/
     printf("Enter text to append:\n");
     get_input(input, bufferSize);
     LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
@@ -114,7 +130,7 @@ void append_text(int LineNewLength, char*input, char** text, int currentLineNum,
 }
 
 void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize) {
-    system("CLS");
+    /*system("CLS");*/
     printf("New line is started\n");
     (*numberOfRaws)++;
     (*currentLineNum)++;
@@ -123,7 +139,7 @@ void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t
 }
 
 static void save_to_file(char** text, int numberOfRaws, char* input, int bufferSize){
-    system("CLS");
+    /*system("CLS");*/
     printf("Enter the file name for saving: \n");
     get_input(input, bufferSize);
 
@@ -139,8 +155,8 @@ static void save_to_file(char** text, int numberOfRaws, char* input, int bufferS
     fclose(file);
 }
 
-static void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input) {
-    system("CLS");
+static void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input, int* currentLineNum) {
+    /*system("CLS");*/
     printf("Enter the file name for loading:\n");
     get_input(input, bufferSize);
 
@@ -158,13 +174,14 @@ static void load_from_file(char*** text, char* mystring, int bufferSize, int* nu
             (*text)[*numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
             strcpy_s((*text)[*numberOfRaws], bufferSize, mystring);
             (*numberOfRaws)++;
+            (*currentLineNum)++;
         }
         fclose(file);
     }
 }
 
 void print_to_console(int numberOfRaws,int bufferSize, char** text) {
-    system("CLS");
+    /*system("CLS");*/
     printf("The current text is:\n");
     for (int i = 0; i < numberOfRaws; i++) {
         for (int j = 0; j < bufferSize; j++)
@@ -191,7 +208,7 @@ static void insert_text(char* temporary,int bufferSize, char** text, int line, i
 }
 
 static void search(int substringLen,char* input,int numberOfRaws,int match_bool, char** text, int matches_num, int bufferSize) {
-    system("CLS");
+    /*system("CLS");*/
     printf("Enter text to search:\n");
     get_input(input, bufferSize);
     substringLen = strlen(input);
@@ -220,4 +237,3 @@ static void search(int substringLen,char* input,int numberOfRaws,int match_bool,
     printf("Number of matches: %d\n", matches_num);
     matches_num = 0;
 }
-

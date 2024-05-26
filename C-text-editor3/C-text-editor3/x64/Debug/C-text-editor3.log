@@ -1,5 +1,5 @@
 ﻿  C-text-editor3.cpp
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(111,66): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(197,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(201,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(127,66): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(214,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(218,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   C-text-editor3.vcxproj -> C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\x64\Debug\C-text-editor3.exe
