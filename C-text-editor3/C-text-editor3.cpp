@@ -10,6 +10,8 @@ void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t
 void save_to_file(char** text, int numberOfRaws,char* input);
 void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input);
 void print_to_console(int numberOfRaws, int bufferSize, char** text);
+void insert_text(char* temporary, int bufferSize, char** text, int line, int index, char* input);
+void search(int substringLen, char* input, int numberOfRaws, int match_bool, char** text, int matches_num);
 
 int main() {
     char* input = 0;
@@ -17,9 +19,10 @@ int main() {
     int numberOfRaws = 1;
     int LineNewLength = 0;
     int currentLineNum = 0;
-    int matches = 0;
-    int match = 0;
+    int matches_num = 0;
+    int match_bool = 0;
     int substringLen = 0;
+    int line, index;
 
     char* mystring = (char*)calloc(bufferSize, sizeof(char));
     char* temporary = (char*)calloc(bufferSize, sizeof(char));
@@ -63,54 +66,22 @@ int main() {
                 break;
             case '5':
                 system("CLS");
-                printf("The current text is:\n");
                 print_to_console(numberOfRaws, bufferSize, text);
                 break;
             case '6':
                 system("CLS");
-                int line, index;
                 printf("Choose line and index:\n");
                 scanf_s("%d %d", &line, &index);
                 getchar();
                 printf("Enter text to insert:\n");
                 get_input(input, bufferSize);
-                strcpy_s(temporary, bufferSize, text[line - 1]);
-                temporary[index] = '\0';
-                strcat_s(temporary, bufferSize, input);
-                strcat_s(temporary, bufferSize, text[line - 1] + index);
-                text[line - 1] = (char*)calloc(bufferSize, sizeof(char));
-                strcpy_s(text[line - 1], bufferSize, temporary);
-                printf("New line is: %s\n", text[line - 1]);
+                insert_text(temporary,bufferSize,text,line,index,input);
                 break;
             case '7':
                 system("CLS");
                 printf("Enter text to search:\n");
                 get_input(input, bufferSize);
-                substringLen = strlen(input);
-                for (int i = 0; i < numberOfRaws; i++)
-                {
-                    char* currentLine = text[i];
-                    int lineLen = strlen(currentLine);
-
-                    for (int j = 0; j <= lineLen - substringLen; j++)
-                    {
-                        match = 1;
-                        for (int l = 0; l < substringLen; l++)
-                        {
-                            if (currentLine[j + l] != input[l])
-                            {
-                                match = 0;
-                                break;
-                            }
-                        }
-                        if (match) {
-                            matches += 1;
-                            printf("Text is present at this position: %d %d\n", i, j);
-                        }
-                    }
-                }
-                printf("Number of matches: %d\n", matches);
-                matches = 0;
+                search(substringLen,input,numberOfRaws, match_bool, text,matches_num);
                 break;
             case '8':
                 system("CLS");
@@ -198,6 +169,7 @@ static void load_from_file(char*** text, char* mystring, int bufferSize, int* nu
 }
 
 void print_to_console(int numberOfRaws,int bufferSize, char** text) {
+    printf("The current text is:\n");
     for (int i = 0; i < numberOfRaws; i++) {
         for (int j = 0; j < bufferSize; j++)
         {
@@ -208,5 +180,43 @@ void print_to_console(int numberOfRaws,int bufferSize, char** text) {
             printf("%c", text[i][j]);
         }
     }
+}
+
+static void insert_text(char* temporary,int bufferSize, char** text, int line, int index, char* input) {
+    strcpy_s(temporary, bufferSize, text[line - 1]);
+    temporary[index] = '\0';
+    strcat_s(temporary, bufferSize, input);
+    strcat_s(temporary, bufferSize, text[line - 1] + index);
+    text[line - 1] = (char*)calloc(bufferSize, sizeof(char));
+    strcpy_s(text[line - 1], bufferSize, temporary);
+    printf("New line is: %s\n", text[line - 1]);
+}
+
+static void search(int substringLen,char* input,int numberOfRaws,int match_bool, char** text, int matches_num) {
+    substringLen = strlen(input);
+    for (int i = 0; i < numberOfRaws; i++)
+    {
+        char* currentLine = text[i];
+        int lineLen = strlen(currentLine);
+
+        for (int j = 0; j <= lineLen - substringLen; j++)
+        {
+            match_bool = 1;
+            for (int l = 0; l < substringLen; l++)
+            {
+                if (currentLine[j + l] != input[l])
+                {
+                    match_bool = 0;
+                    break;
+                }
+            }
+            if (match_bool) {
+                matches_num += 1;
+                printf("Text is present at this position: %d %d\n", i, j);
+            }
+        }
+    }
+    printf("Number of matches: %d\n", matches_num);
+    matches_num = 0;
 }
 
