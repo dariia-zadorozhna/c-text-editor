@@ -14,7 +14,6 @@ void insert_text(char* temporary, int bufferSize, char** text, int line, int ind
 void search(int substringLen, char* input, int numberOfRaws, int match_bool, char** text, int matches_num,int bufferSize);
 
 int main() {
-    char* input = 0;
     const size_t bufferSize = 256;
     int numberOfRaws = 1;
     int LineNewLength = 0;
@@ -26,16 +25,18 @@ int main() {
 
     char* mystring = (char*)calloc(bufferSize, sizeof(char));
     char* temporary = (char*)calloc(bufferSize, sizeof(char));
-
-    input = (char*)malloc(bufferSize * sizeof(char));
-
-    if (input == NULL) {
-        printf("Memory allocation failed. Exiting...\n");
-        return 1;
-    }
-
+    char* input = (char*)malloc(bufferSize * sizeof(char));
     char** text = (char**)calloc(numberOfRaws, sizeof(char*));
     text[0] = (char*)calloc(bufferSize, sizeof(char));
+
+    if (input == NULL || mystring == NULL || temporary == NULL || text == NULL || text[0] == NULL) {
+        printf("Memory allocation failed. Exiting...\n");
+        free(input);
+        free(mystring);
+        free(temporary);
+        free(text);
+        return 1;
+    }
 
     print_commands();
 
@@ -64,8 +65,11 @@ int main() {
             case '6':
                 /*system("CLS");*/
                 printf("Choose line and index:\n");
-                if (scanf_s("%d %d", &line, &index) == 2) {
-                    getchar();
+                if ((scanf_s("%d %d", &line, &index)) == 2) {
+                    while (getchar() != '\n') {
+                        continue;
+                    }
+
                     if (line <= numberOfRaws && line >= 0 && index >= 0) {
                         insert_text(temporary, bufferSize, text, line, index, input);
                     }
@@ -90,6 +94,7 @@ int main() {
                 free(input);
                 free(text);
                 free(temporary);
+                free(mystring);
                 return 0;
             default:
                 printf("Invalid command. Try again:\n");
@@ -126,6 +131,9 @@ void append_text(int LineNewLength, char*input, char** text, int currentLineNum,
     get_input(input, bufferSize);
     LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
     text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
+    if (text[currentLineNum] == NULL) {
+        printf("Memory allocation failed.\n");
+    }
     strcat_s(text[currentLineNum], LineNewLength, input);
 }
 
@@ -136,6 +144,9 @@ void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t
     (*currentLineNum)++;
     *text = (char**)realloc(*text, (*numberOfRaws) * sizeof(char*));
     (*text)[*currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
+    if (*text == NULL || (*text)[*currentLineNum] == NULL) {
+        printf("Memory allocation failed.\n");
+    }
 }
 
 static void save_to_file(char** text, int numberOfRaws, char* input, int bufferSize){
@@ -172,6 +183,9 @@ static void load_from_file(char*** text, char* mystring, int bufferSize, int* nu
             mystring[strcspn(mystring, "\n")] = '\0';
             *text = (char**)realloc(*text, ((*numberOfRaws) + 1) * sizeof(char*));
             (*text)[*numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
+            if (*text == NULL || (*text)[*currentLineNum] == NULL) {
+                printf("Memory allocation failed.\n");
+            }
             strcpy_s((*text)[*numberOfRaws], bufferSize, mystring);
             (*numberOfRaws)++;
             (*currentLineNum)++;
