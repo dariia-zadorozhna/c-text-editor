@@ -9,7 +9,7 @@ void append_text(int LineNewLength, char* input, char** text, int currentLineNum
 void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize);
 void save_to_file(char** text, int numberOfRaws,char* input);
 void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input);
-
+void print_to_console(int numberOfRaws, int bufferSize, char** text);
 
 int main() {
     char* input = 0;
@@ -64,16 +64,7 @@ int main() {
             case '5':
                 system("CLS");
                 printf("The current text is:\n");
-                for (int i = 0; i < numberOfRaws; i++) {
-                    for (int j = 0; j < bufferSize; j++)
-                    {
-                        if (text[i][j] == '\0') {
-                            printf("\n");
-                            break;
-                        }
-                        printf("%c", text[i][j]);
-                    }
-                }
+                print_to_console(numberOfRaws, bufferSize, text);
                 break;
             case '6':
                 system("CLS");
@@ -203,6 +194,19 @@ static void load_from_file(char*** text, char* mystring, int bufferSize, int* nu
             (*numberOfRaws)++;
         }
         fclose(file);
+    }
+}
+
+void print_to_console(int numberOfRaws,int bufferSize, char** text) {
+    for (int i = 0; i < numberOfRaws; i++) {
+        for (int j = 0; j < bufferSize; j++)
+        {
+            if (text[i][j] == '\0') {
+                printf("\n");
+                break;
+            }
+            printf("%c", text[i][j]);
+        }
     }
 }
 
