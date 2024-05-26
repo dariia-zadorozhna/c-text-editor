@@ -7,6 +7,8 @@ void print_commands();
 char* get_input(char* input, int bufferSize);
 void append_text(int LineNewLength, char* input, char** text, int currentLineNum);
 void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize);
+void save_to_file(char** text, int numberOfRaws,char* input);
+void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input);
 
 
 int main() {
@@ -19,6 +21,7 @@ int main() {
     int match = 0;
     int substringLen = 0;
 
+    char* mystring = (char*)calloc(bufferSize, sizeof(char));
     char* temporary = (char*)calloc(bufferSize, sizeof(char));
 
     input = (char*)malloc(bufferSize * sizeof(char));
@@ -44,45 +47,19 @@ int main() {
                 append_text(LineNewLength,input,text,currentLineNum);
                 break;
             case '2':
-                start_new_line(&text, &numberOfRaws, &currentLineNum, bufferSize);
+                start_new_line(&text, &numberOfRaws, &currentLineNum, bufferSize); 
                 break;
             case '3':
                 system("CLS");
                 printf("Enter the file name for saving: \n");
                 get_input(input, bufferSize);
-
-                FILE* file;
-
-                fopen_s(&file, input, "w");
-                if (file != NULL) {
-                    for (int i = 0; i < numberOfRaws; i++) {
-                        fputs(text[i], file);
-                        fputs("\n", file);
-                    }
-                }
-                fclose(file);
+                save_to_file(text, numberOfRaws, input);
                 break;
             case '4':
                 system("CLS");
                 printf("Enter the file name for loading:\n");
                 get_input(input, bufferSize);
-                char mystring[bufferSize];
-
-                fopen_s(&file, input, "r");
-                if (file == NULL) {
-                    printf("Error opening file!");
-                }
-                else {
-                    while (fgets(mystring, bufferSize, file))
-                    {
-                        mystring[strcspn(mystring, "\n")] = '\0';
-                        text = (char**)realloc(text, (numberOfRaws + 1) * sizeof(char*));
-                        text[numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
-                        strcpy_s(text[numberOfRaws], bufferSize, mystring);
-                        numberOfRaws++;
-                    }
-                    fclose(file);
-                }
+                load_from_file(&text,mystring,bufferSize,&numberOfRaws,input);
                 break;
             case '5':
                 system("CLS");
@@ -193,5 +170,39 @@ void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t
     (*currentLineNum)++;
     *text = (char**)realloc(*text, (*numberOfRaws) * sizeof(char*));
     (*text)[*currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
+}
+
+static void save_to_file(char** text, int numberOfRaws, char* input){
+    FILE* file;
+
+    fopen_s(&file, input, "w");
+    if (file != NULL) {
+        for (int i = 0; i < numberOfRaws; i++) {
+            fputs(text[i], file);
+            fputs("\n", file);
+        }
+    }
+    fclose(file);
+}
+
+static void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input) {
+
+    FILE* file;
+
+    fopen_s(&file, input, "r");
+    if (file == NULL) {
+        printf("Error opening file!");
+    }
+    else {
+        while (fgets(mystring, bufferSize, file))
+        {
+            mystring[strcspn(mystring, "\n")] = '\0';
+            *text = (char**)realloc(*text, ((*numberOfRaws) + 1) * sizeof(char*));
+            (*text)[*numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
+            strcpy_s((*text)[*numberOfRaws], bufferSize, mystring);
+            (*numberOfRaws)++;
+        }
+        fclose(file);
+    }
 }
 
