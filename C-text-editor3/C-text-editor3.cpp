@@ -2,106 +2,103 @@
 #include <stdlib.h> // for dynamic memory allocation
 #include <string.h>
 #define  _GNU_SOURCE
+#define BUFFER_SIZE 256
+
+typedef struct TextEditor {
+    char** text;
+    int numberOfRaws;
+    int currentLineNum;
+
+    // Methods
+    void (*print_commands)();
+    char* (*get_input)(char* input);
+    void (*append_text)(char* input, struct TextEditor* editor);
+    void (*start_new_line)(struct TextEditor* editor);
+    void (*save_to_file)(char* input, struct TextEditor* editor);
+    void (*load_from_file)(char* input, struct TextEditor* editor);
+    void (*print_to_console)(struct TextEditor* editor);
+    void (*search)(char* input, struct TextEditor* editor);
+    void (*insert)(char* input, struct TextEditor* editor);
+} TextEditor;
 
 void print_commands();
-char* get_input(char* input, int bufferSize);
-void append_text(int LineNewLength, char* input, char** text, int currentLineNum,int bufferSize);
-void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize);
-void save_to_file(char** text, int numberOfRaws,char* input,int bufferSize);
-void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input, int* currentLineNum);
-void print_to_console(int numberOfRaws, int bufferSize, char** text);
-void insert_text(char* temporary, int bufferSize, char** text, int line, int index, char* input);
-void search(int substringLen, char* input, int numberOfRaws, int match_bool, char** text, int matches_num,int bufferSize);
+char* get_input(char* input);
+void append_text(char* input, TextEditor* editor);
+void start_new_line(TextEditor* editor);
+void save_to_file(char* input,TextEditor* editor);
+void load_from_file(char* input, TextEditor* editor);
+void print_to_console(TextEditor* editor);
+void search(char* input, TextEditor* editor);
+void insert(char* input, TextEditor* editor);
 
 int main() {
-    const size_t bufferSize = 256;
-    int numberOfRaws = 1;
-    int LineNewLength = 0;
-    int currentLineNum = 0;
-    int matches_num = 0;
-    int match_bool = 0;
-    int substringLen = 0;
-    int line, index;
+    TextEditor editor = { 0 };
+    editor.numberOfRaws = 1;
+    editor.currentLineNum = 0;
+    editor.text = (char**)calloc(editor.numberOfRaws, sizeof(char*));
+    editor.text[0] = (char*)calloc(BUFFER_SIZE, sizeof(char));
+    char* input = (char*)malloc(BUFFER_SIZE * sizeof(char));
 
-    char* mystring = (char*)calloc(bufferSize, sizeof(char));
-    char* temporary = (char*)calloc(bufferSize, sizeof(char));
-    char* input = (char*)malloc(bufferSize * sizeof(char));
-    char** text = (char**)calloc(numberOfRaws, sizeof(char*));
-    text[0] = (char*)calloc(bufferSize, sizeof(char));
+    editor.print_commands = print_commands;
+    editor.get_input = get_input;
+    editor.append_text = append_text;
+    editor.start_new_line = start_new_line;
+    editor.save_to_file = save_to_file;
+    editor.load_from_file = load_from_file;
+    editor.print_to_console = print_to_console;
+    editor.search = search;
+    editor.insert = insert;
 
-    if (input == NULL || mystring == NULL || temporary == NULL || text == NULL || text[0] == NULL) {
+   /* if (input == NULL || text == NULL || text[0] == NULL) {
         printf("Memory allocation failed. Exiting...\n");
         free(input);
-        free(mystring);
-        free(temporary);
         free(text);
         return 1;
-    }
-
-    print_commands();
+    }*/
 
     while (1) {
-        /*print_commands();*/
-        printf("Type in the next command:\n");
-        get_input(input, bufferSize);
+        editor.print_commands();
+        editor.get_input(input);
         if (strlen(input) == 1)
         {
             switch (input[0]) {
             case '1':
-                append_text(LineNewLength,input,text,currentLineNum,bufferSize);
+                editor.append_text(input,&editor);
                 break;
             case '2':
-                start_new_line(&text, &numberOfRaws, &currentLineNum, bufferSize); 
+                editor.start_new_line(&editor); 
                 break;
             case '3':
-                save_to_file(text, numberOfRaws, input,bufferSize);
+                editor.save_to_file(input, &editor);
                 break;
             case '4':
-                load_from_file(&text,mystring,bufferSize,&numberOfRaws,input, &currentLineNum);
+                editor.load_from_file(input,&editor);
                 break;
             case '5':
-                print_to_console(numberOfRaws, bufferSize, text);
+                editor.print_to_console(&editor);
                 break;
             case '6':
-                /*system("CLS");*/
-                printf("Choose line and index:\n");
-                if ((scanf_s("%d %d", &line, &index)) == 2) {
-                    while (getchar() != '\n') {
-                        continue;
-                    }
-
-                    if (line <= numberOfRaws && line >= 0 && index >= 0) {
-                        insert_text(temporary, bufferSize, text, line, index, input);
-                    }
-                    else {
-                        printf("This line does not exist yet or the index is wrong.\n");
-                    }
-                }
-                else {
-                    printf("The entered line and index are incorrect.\n");
-                }
+                editor.insert(input,&editor);
                 break;
             case '7':
-                search(substringLen,input,numberOfRaws, match_bool, text,matches_num,bufferSize);
+                editor.search(input,&editor);
                 break;
             case '8':
-                /*system("CLS");*/
+                system("CLS");
                 printf("Exiting...\n");
-                for (int i = 0; i < numberOfRaws; i++)
+                for (int i = 0; i < editor.numberOfRaws; i++)
                 {
-                    (text[i]);
+                    free(editor.text[i]);
                 }
                 free(input);
-                free(text);
-                free(temporary);
-                free(mystring);
+                free(editor.text);
                 return 0;
             default:
                 printf("Invalid command. Try again:\n");
             }
         }
         else {
-            /*system("CLS");*/
+            system("CLS");
             printf("The command is invalid. Try again!\n");
         }
     }
@@ -119,57 +116,63 @@ void print_commands() {
         "8 - Exit\n");
 }
 
-char* get_input(char* input, int bufferSize) {
-    fgets(input, bufferSize, stdin);
+char* get_input(char* input) {
+    fgets(input, BUFFER_SIZE, stdin);
     input[strcspn(input, "\n")] = '\0';
     return input;
 }
 
-void append_text(int LineNewLength, char*input, char** text, int currentLineNum,int bufferSize) {
-   /* system("CLS");*/
+void append_text(char*input,TextEditor* editor) {
+    int LineNewLength = 0;
+    system("CLS");
     printf("Enter text to append:\n");
-    get_input(input, bufferSize);
-    LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
-    text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
-    if (text[currentLineNum] == NULL) {
+    get_input(input);
+    LineNewLength = strlen(input) + strlen(editor->text[editor->currentLineNum]) + 1;
+    editor->text[editor->currentLineNum] = (char*)realloc(editor->text[editor->currentLineNum], LineNewLength * sizeof(char));
+    if (editor->text[editor->currentLineNum] == NULL) {
         printf("Memory allocation failed.\n");
     }
-    strcat_s(text[currentLineNum], LineNewLength, input);
+    strcat_s(editor->text[editor->currentLineNum], LineNewLength, input);
 }
 
-void start_new_line(char*** text, int* numberOfRaws, int* currentLineNum, size_t bufferSize) {
-    /*system("CLS");*/
+void start_new_line(TextEditor* editor) {
+    system("CLS");
     printf("New line is started\n");
-    (*numberOfRaws)++;
-    (*currentLineNum)++;
-    *text = (char**)realloc(*text, (*numberOfRaws) * sizeof(char*));
-    (*text)[*currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
-    if (*text == NULL || (*text)[*currentLineNum] == NULL) {
+    editor->numberOfRaws++;
+    editor->currentLineNum++;
+    editor->text = (char**)realloc(editor->text, editor->numberOfRaws * sizeof(char*));
+    editor->text[editor->currentLineNum] = (char*)calloc(BUFFER_SIZE, sizeof(char));
+    if (editor->text == NULL || (editor->text)[editor->currentLineNum] == NULL) {
         printf("Memory allocation failed.\n");
     }
 }
 
-static void save_to_file(char** text, int numberOfRaws, char* input, int bufferSize){
-    /*system("CLS");*/
+static void save_to_file(char* input, TextEditor* editor){
+    system("CLS");
     printf("Enter the file name for saving: \n");
-    get_input(input, bufferSize);
+    get_input(input);
 
     FILE* file;
 
     fopen_s(&file, input, "w");
     if (file != NULL) {
-        for (int i = 0; i < numberOfRaws; i++) {
-            fputs(text[i], file);
+        for (int i = 0; i < editor->numberOfRaws; i++) {
+            fputs(editor->text[i], file);
             fputs("\n", file);
         }
     }
     fclose(file);
 }
 
-static void load_from_file(char*** text, char* mystring, int bufferSize, int* numberOfRaws, char* input, int* currentLineNum) {
-    /*system("CLS");*/
+static void load_from_file(char* input, TextEditor* editor) {
+    char* mystring = (char*)calloc(BUFFER_SIZE, sizeof(char));
+    if (mystring == NULL) {
+        printf("Memory allocation failed.");
+        free(mystring);
+    }
+    system("CLS");
     printf("Enter the file name for loading:\n");
-    get_input(input, bufferSize);
+    get_input(input);
 
     FILE* file;
 
@@ -178,57 +181,48 @@ static void load_from_file(char*** text, char* mystring, int bufferSize, int* nu
         printf("Error opening file!");
     }
     else {
-        while (fgets(mystring, bufferSize, file))
+        while (fgets(mystring, BUFFER_SIZE, file))
         {
             mystring[strcspn(mystring, "\n")] = '\0';
-            *text = (char**)realloc(*text, ((*numberOfRaws) + 1) * sizeof(char*));
-            (*text)[*numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
-            if (*text == NULL || (*text)[*currentLineNum] == NULL) {
+            editor->text = (char**)realloc(editor->text, (editor->numberOfRaws + 1) * sizeof(char*));
+            editor->text[editor->numberOfRaws] = (char*)calloc(BUFFER_SIZE, sizeof(char));
+            if (editor->text == NULL || editor->text[editor->currentLineNum] == NULL) {
                 printf("Memory allocation failed.\n");
             }
-            strcpy_s((*text)[*numberOfRaws], bufferSize, mystring);
-            (*numberOfRaws)++;
-            (*currentLineNum)++;
+            strcpy_s(editor->text[editor->numberOfRaws], BUFFER_SIZE, mystring);
+            editor->numberOfRaws++;
+            editor->currentLineNum++;
         }
         fclose(file);
     }
 }
 
-void print_to_console(int numberOfRaws,int bufferSize, char** text) {
-    /*system("CLS");*/
+void print_to_console(TextEditor* editor) {
+    system("CLS");
     printf("The current text is:\n");
-    for (int i = 0; i < numberOfRaws; i++) {
-        for (int j = 0; j < bufferSize; j++)
+    for (int i = 0; i < editor->numberOfRaws; i++) {
+        for (int j = 0; j < BUFFER_SIZE; j++)
         {
-            if (text[i][j] == '\0') {
+            if (editor->text[i][j] == '\0') {
                 printf("\n");
                 break;
             }
-            printf("%c", text[i][j]);
+            printf("%c", editor->text[i][j]);
         }
     }
 }
 
-static void insert_text(char* temporary,int bufferSize, char** text, int line, int index, char* input) {
-    printf("Enter text to insert:\n");
-    get_input(input, bufferSize);
-    strcpy_s(temporary, bufferSize, text[line - 1]);
-    temporary[index] = '\0';
-    strcat_s(temporary, bufferSize, input);
-    strcat_s(temporary, bufferSize, text[line - 1] + index);
-    text[line - 1] = (char*)calloc(bufferSize, sizeof(char));
-    strcpy_s(text[line - 1], bufferSize, temporary);
-    printf("New line is: %s\n", text[line - 1]);
-}
-
-static void search(int substringLen,char* input,int numberOfRaws,int match_bool, char** text, int matches_num, int bufferSize) {
-    /*system("CLS");*/
+static void search(char* input,TextEditor* editor) {
+    int matches_num = 0;
+    int match_bool = 0;
+    int substringLen = 0;
+    system("CLS");
     printf("Enter text to search:\n");
-    get_input(input, bufferSize);
+    get_input(input);
     substringLen = strlen(input);
-    for (int i = 0; i < numberOfRaws; i++)
+    for (int i = 0; i < editor->numberOfRaws; i++)
     {
-        char* currentLine = text[i];
+        char* currentLine = editor->text[i];
         int lineLen = strlen(currentLine);
 
         for (int j = 0; j <= lineLen - substringLen; j++)
@@ -249,5 +243,38 @@ static void search(int substringLen,char* input,int numberOfRaws,int match_bool,
         }
     }
     printf("Number of matches: %d\n", matches_num);
-    matches_num = 0;
+}
+
+static void insert(char* input, TextEditor* editor) {
+    char* temporary = (char*)calloc(BUFFER_SIZE, sizeof(char));
+    if (temporary == NULL) {
+        printf("Memory allocation failed.");
+        free(temporary);
+    }
+    system("CLS");
+    int line, index;
+    printf("Choose line and index:\n");
+    if ((scanf_s("%d %d", &line, &index)) == 2) {
+        while (getchar() != '\n') {
+            continue;
+        }
+
+        if (line <= editor->numberOfRaws && line >= 0 && index >= 0) {
+            printf("Enter text to insert:\n");
+            get_input(input);
+            strcpy_s(temporary, BUFFER_SIZE, editor->text[line - 1]);
+            temporary[index] = '\0';
+            strcat_s(temporary, BUFFER_SIZE, input);
+            strcat_s(temporary, BUFFER_SIZE, editor->text[line - 1] + index);
+            editor->text[line - 1] = (char*)calloc(BUFFER_SIZE, sizeof(char));
+            strcpy_s(editor->text[line - 1], BUFFER_SIZE, temporary);
+            printf("New line is: %s\n", editor->text[line - 1]);
+        }
+        else {
+            printf("This line does not exist yet or the index is wrong.\n");
+        }
+    }
+    else {
+        printf("The entered line and index are incorrect.\n");
+    }
 }

@@ -18,5 +18,11 @@
     <ClCompile Include="C-text-editor3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="forlongtext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="longtext.txt" />
   </ItemGroup>
 </Project>

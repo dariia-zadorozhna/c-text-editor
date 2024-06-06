@@ -128,6 +128,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="C-text-editor3.cpp" />
+    <ClCompile Include="forlongtext.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="longtext.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
