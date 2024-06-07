@@ -21,6 +21,7 @@ private:
     void print_to_console();
     void search();
     void insert();
+    void insert_with_replacement();
 
     int bufferSize;
     int numberOfRaws;
@@ -59,7 +60,8 @@ void TextEditor::print_commands() {
         << "5 - Print the current text to console\n"
         << "6 - Insert the text by line and symbol index\n"
         << "7 - Search\n"
-        << "8 - Exit\n";
+        << "8 - Insert the text by line and symbol index with replacement\n"
+        << "15 - Exit\n";
 }
 
 void TextEditor::get_input() {
@@ -258,6 +260,27 @@ void TextEditor::insert() {
     }
 }
 
+void TextEditor::insert_with_replacement() {
+    system("CLS");
+    int line, index = 0;
+    int size = 0;
+    cout << "Choose line and index:\n";
+    if ((scanf_s("%d %d", &line, &index)) == 2) {
+        while (getchar() != '\n') {
+            continue;
+        }
+        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+            cout << "Enter text to insert:\n";
+            get_input();
+        }   
+    }
+    for (int i = 0; i < strlen(input); i++) 
+    {
+        text[line][index + i] = input[i];
+    }
+}
+
+
 
 void TextEditor::run() {
     while (true) {
@@ -288,6 +311,27 @@ void TextEditor::run() {
                 search();
                 break;
             case '8':
+                insert_with_replacement();
+                break;
+            case '9':
+                // implemented command
+                break;
+            case '10':
+                // implemented command
+                break;
+            case '11':
+                // implemented command
+                break;
+            case '12':
+                // implemented command
+                break;
+            case '13':
+                // implemented command
+                break;
+            case '14':
+                // implemented command
+                break;
+            case '15':
                 system("CLS");
                 cout << "Exiting...\n";
                 return;
