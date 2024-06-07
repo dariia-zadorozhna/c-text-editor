@@ -30,20 +30,24 @@ private:
 };
 TextEditor::TextEditor(int BufSize)
     :bufferSize(BufSize), numberOfRaws(1), currentLineNum(0) {
-    input = (char*)malloc(bufferSize * sizeof(char));
-    text = (char**)calloc(numberOfRaws, sizeof(char*));
-    text[0] = (char*)calloc(bufferSize, sizeof(char));
-    if (input == NULL || text == NULL || text[0] == NULL) {
-        cerr << "Memory allocation failed. Exiting..." << endl;
+    try {
+        input = new char[bufferSize];
+        text = new char* [numberOfRaws];
+        text[0] = new char[bufferSize];
+        input[0] = '\0';
+        text[0][0] = '\0';
+    }
+    catch (const bad_alloc& e) {
+        cerr << "Memory allocation failed: " << e.what() << ". Exiting..." << endl;
         exit(1);
     }
 }
 TextEditor::~TextEditor() {
     for (int i = 0; i < numberOfRaws; i++) {
-        free(text[i]);
+        delete[] text[i];
     }
-    free(input);
-    free(text);
+    delete[] input;
+    delete[] text;
 }
 
 void TextEditor::print_commands() {
@@ -61,6 +65,7 @@ void TextEditor::print_commands() {
 void TextEditor::get_input() {
     fgets(input, bufferSize, stdin);
     input[strcspn(input, "\n")] = '\0';
+
 }
 
 void TextEditor::append_text() {
@@ -69,7 +74,16 @@ void TextEditor::append_text() {
     cout << "Enter text to append:\n";
     get_input();
     LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
-    text[currentLineNum] = (char*)realloc(text[currentLineNum], LineNewLength * sizeof(char));
+    try {
+        char* newLine = new char[LineNewLength];
+        memcpy(newLine, text[currentLineNum], LineNewLength);
+        delete[] text[currentLineNum];
+        text[currentLineNum] = newLine;
+    }
+    catch (const bad_alloc& e) {
+        cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
+        exit(1);
+    }
     if (text[currentLineNum] == NULL) {
         cout << "Memory allocation failed.\n";
     }
@@ -81,10 +95,27 @@ void TextEditor::start_new_line() {
     cout << "New line is started\n";
     numberOfRaws++;
     currentLineNum++;
-    text = (char**)realloc(text, numberOfRaws * sizeof(char*));
-    text[currentLineNum] = (char*)calloc(bufferSize, sizeof(char));
-    if (text == NULL || text[currentLineNum] == NULL) {
-        cout << "Memory allocation failed.\n";
+    try {
+        char** newText = new char*[numberOfRaws];
+        int size = 0;
+        for (int i = 0; i < currentLineNum; i++) {
+            while (text[i][size] != '\0') {
+                ++size;
+            }
+            newText[i] = new char[size + 1];  
+            memcpy(newText[i], text[i], size);
+            newText[i][size] = '\0';
+            delete[] text[i];
+        }
+        newText[currentLineNum] = new char[bufferSize];
+        newText[currentLineNum][0] = '\0';
+        delete[] text;
+        text = newText;
+        
+    }   
+    catch (const bad_alloc& e) {
+        cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
+        exit(1);
     }
 }
 
@@ -103,10 +134,11 @@ void TextEditor::save_to_file(){
         }
     }
     fclose(file);
+    file = NULL;
 }
 
 void TextEditor::load_from_file() {
-    char* mystring = (char*)calloc(bufferSize, sizeof(char));
+    char* mystring = new char[bufferSize];
     system("CLS");
     cout << "Enter the file name for loading:\n";
     get_input();
@@ -120,17 +152,37 @@ void TextEditor::load_from_file() {
     else {
         while (fgets(mystring, bufferSize, file))
         {
-            mystring[strcspn(mystring, "\n")] = '\0';
-            text = (char**)realloc(text, ((numberOfRaws) + 1) * sizeof(char*));
-            text[numberOfRaws] = (char*)calloc(bufferSize, sizeof(char));
-            if (text == NULL || text[currentLineNum] == NULL) {
-                printf("Memory allocation failed.\n");
-            }
-            strcpy_s(text[numberOfRaws], bufferSize, mystring);
             numberOfRaws++;
             currentLineNum++;
+
+            mystring[strcspn(mystring, "\n")] = '\0';
+
+            try {
+                char** newText = new char* [numberOfRaws];
+                int size = 0;
+                for (int i = 0; i < currentLineNum; i++) {
+                    while (text[i][size] != '\0') {
+                        ++size;
+                    }
+                    newText[i] = new char[size + 1];
+                    memcpy(newText[i], text[i], size);
+                    newText[i][size] = '\0';
+                    delete[] text[i];
+                }
+                newText[currentLineNum] = new char[bufferSize];
+                newText[currentLineNum][0] = '\0';
+                memcpy(newText[currentLineNum], mystring, bufferSize);
+                delete[] text;
+                text = newText;
+
+            }
+            catch (const bad_alloc& e) {
+                cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
+                exit(1);
+            }
         }
         fclose(file);
+        file = NULL;
     }
 }
 
@@ -177,7 +229,7 @@ void TextEditor::search() {
 }
 
 void TextEditor::insert() {
-    char* temporary = (char*)calloc(bufferSize, sizeof(char));
+    char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
     cout <<"Choose line and index:\n";
@@ -193,7 +245,7 @@ void TextEditor::insert() {
             temporary[index] = '\0';
             strcat_s(temporary, bufferSize, input);
             strcat_s(temporary, bufferSize, text[line - 1] + index);
-            text[line - 1] = (char*)calloc(bufferSize, sizeof(char));
+            text[line - 1] = new char[bufferSize];
             strcpy_s(text[line - 1], bufferSize, temporary);
             cout << "New line is: " << text[line - 1] << endl;
         }
@@ -205,6 +257,7 @@ void TextEditor::insert() {
         cout << "The entered line and index are incorrect.\n";
     }
 }
+
 
 void TextEditor::run() {
     while (true) {
