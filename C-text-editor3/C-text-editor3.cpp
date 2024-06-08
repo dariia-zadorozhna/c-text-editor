@@ -22,17 +22,25 @@ private:
     void search();
     void insert();
     void insert_with_replacement();
+    void delete_command();
+    void cut();
+    void paste();
+    void copy();
 
     int bufferSize;
     int numberOfRaws;
     int currentLineNum;
+    int counter;
     char* input;
+    char* cut_copy_paste;
     char** text;
+    int cut_copy_paste_index;
 };
 TextEditor::TextEditor(int BufSize)
-    :bufferSize(BufSize), numberOfRaws(1), currentLineNum(0) {
+    :bufferSize(BufSize), numberOfRaws(1), currentLineNum(0), counter(0), cut_copy_paste_index(0) {
     try {
         input = new char[bufferSize];
+        cut_copy_paste = new char[bufferSize];
         text = new char* [numberOfRaws];
         text[0] = new char[bufferSize];
         input[0] = '\0';
@@ -54,13 +62,18 @@ TextEditor::~TextEditor() {
 void TextEditor::print_commands() {
     cout << "Choose a command:\n"
         << "1 - Append text symbols to the end\n"
-        << "2 - Start the new line\n"
+        << "2 - Start the new line\n"   
         << "3 - Save text to the file\n"
         << "4 - Load text from the file\n"
         << "5 - Print the current text to console\n"
         << "6 - Insert the text by line and symbol index\n"
         << "7 - Search\n"
-        << "8 - Insert the text by line and symbol index with replacement\n"
+        << "8 - Delete\n"
+        << "9 - Undo\n"
+        << "11 - Cut\n"
+        << "12 - Paste\n"
+        << "13 - Copy\n"
+        << "14 - Insert the text by line and symbol index with replacement\n"
         << "15 - Exit\n";
 }
 
@@ -75,10 +88,13 @@ void TextEditor::append_text() {
     system("CLS");
     cout << "Enter text to append:\n";
     get_input();
+
     LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
+
     try {
         char* newLine = new char[LineNewLength];
-        memcpy(newLine, text[currentLineNum], LineNewLength);
+        strcpy_s(newLine, LineNewLength, text[currentLineNum]); 
+        strcat_s(newLine, LineNewLength, input); 
         delete[] text[currentLineNum];
         text[currentLineNum] = newLine;
     }
@@ -86,10 +102,6 @@ void TextEditor::append_text() {
         cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
         exit(1);
     }
-    if (text[currentLineNum] == NULL) {
-        cout << "Memory allocation failed.\n";
-    }
-    strcat_s(text[currentLineNum], LineNewLength, input);
 }
 
 void TextEditor::start_new_line() {
@@ -243,16 +255,16 @@ void TextEditor::insert() {
         if (line <= numberOfRaws && line >= 0 && index >= 0) {
             cout << "Enter text to insert:\n";
             get_input();
-            strcpy_s(temporary, bufferSize, text[line - 1]);
+            strcpy_s(temporary, bufferSize, text[line]);
             temporary[index] = '\0';
             strcat_s(temporary, bufferSize, input);
-            strcat_s(temporary, bufferSize, text[line - 1] + index);
-            text[line - 1] = new char[bufferSize];
-            strcpy_s(text[line - 1], bufferSize, temporary);
-            cout << "New line is: " << text[line - 1] << endl;
+            strcat_s(temporary, bufferSize, text[line] + index);
+            text[line] = new char[bufferSize];
+            strcpy_s(text[line], bufferSize, temporary);
+            cout << "New line is: " << text[line] << endl;
         }
         else {
-            cout << "This line does not exist yet or the index is wrong.\n";
+            cout << "The entered line and index are incorrect. \n";
         }
     }
     else {
@@ -280,68 +292,182 @@ void TextEditor::insert_with_replacement() {
     }
 }
 
+void TextEditor::delete_command() {
+    system("CLS");
+    int line, index, num = 0;
+    //int counter = 0;              
+    cout << "Choose line, index and number of symbols:\n";
+    if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
+        while (getchar() != '\n') {
+            continue;
+        }
+        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+            while (text[line][counter] != '\0') {
+                counter++;
+            }
+            while (index != counter) {
+                text[line][index] = text[line][index + num];
+                index++;
+            }
+            counter = 0;
+        }
+        else {
+            cout << "The entered line and index are incorrect.\n";
+        }
+    }
+    else {
+        cout << "The entered line and index are incorrect.\n";
+    }
+}
+
+void TextEditor::cut() {
+    system("CLS");
+    int line, index, num = 0;
+    cout << "Choose line, index and number of symbols:\n";
+    if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
+        while (getchar() != '\n') {
+            continue;
+        }
+
+        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+            while (text[line][counter] != '\0') {
+                counter++;
+            }
+            while (index != counter) {
+                if (cut_copy_paste_index != num) {
+                    cut_copy_paste[cut_copy_paste_index] = text[line][index];
+                    cut_copy_paste_index++;
+                }
+                else {
+                    cut_copy_paste[cut_copy_paste_index] = '\0';
+                }
+                text[line][index] = text[line][index + num];
+                index++;
+            }
+            cut_copy_paste_index = 0;
+            counter = 0;
+        }
+        else {
+            cout << "The entered line and index are incorrect.\n";
+        }
+    }
+    else {
+        cout << "The entered line and index are incorrect.\n";
+    }
+}
+
+void TextEditor::paste() {
+    char* temporary = new char[bufferSize];
+    system("CLS");
+    int line, index;
+    cout << "Choose line and index:\n";
+    if ((scanf_s("%d %d", &line, &index)) == 2) {
+        while (getchar() != '\n') {
+            continue;
+        }
+
+        if (line <= numberOfRaws && line >= 0 && index >= 0 && cut_copy_paste != NULL) {
+            strcpy_s(temporary, bufferSize, text[line]);
+            temporary[index] = '\0';
+            strcat_s(temporary, bufferSize, cut_copy_paste);
+            strcat_s(temporary, bufferSize, text[line] + index);
+            delete[] text[line]; 
+            text[line] = new char[bufferSize];
+            strcpy_s(text[line], bufferSize, temporary);
+            cout << "New line is: " << text[line] << endl;
+        }
+        else {
+            cout << "The entered line and index are incorrect.\n";
+        }
+    }
+    else {
+        cout << "The entered line and index are incorrect.\n";
+    }
+    delete[] temporary;
+}
+
+void TextEditor::copy() {
+    int line, index, num = 0;
+    system("CLS");
+    cout << "Choose line, index and number of symbols:\n";
+    if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
+        while (getchar() != '\n') {
+            continue;
+        }
+        if (line <= numberOfRaws && line >= 0 && index >= 0)
+        {
+            while (cut_copy_paste_index != num) {
+                cut_copy_paste[cut_copy_paste_index] = text[line][index + cut_copy_paste_index];
+                cut_copy_paste_index++;
+            }
+            cut_copy_paste[cut_copy_paste_index] = '\0';
+            cut_copy_paste_index = 0;
+        }
+        else {
+            cout << "The entered line and index are incorrect.\n";
+        }
+    }
+    else {
+        cout << "The entered line and index are incorrect.\n";
+    }
+}
+
 
 
 void TextEditor::run() {
     while (true) {
         print_commands();
         get_input();
-        if (strlen(input) == 1)
-        {
-            switch (input[0]) {
-            case '1':
+        int command = atoi(input);
+        switch (command) {
+            case 1:
                 append_text();
                 break;
-            case '2':
+            case 2:
                 start_new_line();
                 break;
-            case '3':
+            case 3:
                 save_to_file();
                 break;
-            case '4':
+            case 4:
                 load_from_file();
                 break;
-            case '5':
+            case 5:
                 print_to_console();
                 break;
-            case '6':
+            case 6:
                 insert();
                 break;
-            case '7':
+            case 7:
                 search();
                 break;
-            case '8':
+            case 8:
+                delete_command();
+                break;
+            case 9:
+                // implemented command
+                break;
+            case 10:
+                // implemented command
+                break;
+            case 11:
+                cut();
+                break;
+            case 12:
+                paste();
+                break;
+            case 13:
+                copy();
+                break;
+            case 14:
                 insert_with_replacement();
                 break;
-            case '9':
-                // implemented command
-                break;
-            case '10':
-                // implemented command
-                break;
-            case '11':
-                // implemented command
-                break;
-            case '12':
-                // implemented command
-                break;
-            case '13':
-                // implemented command
-                break;
-            case '14':
-                // implemented command
-                break;
-            case '15':
+            case 15:
                 system("CLS");
                 cout << "Exiting...\n";
                 return;
             default:
                 cout << "Invalid command. Try again:\n";
-            }
-        }
-        else {
-            system("CLS");
-            cout << "The command is invalid. Try again!\n";
         }
     }
 }
