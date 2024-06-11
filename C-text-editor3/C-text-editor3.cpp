@@ -12,39 +12,50 @@ public:
 
     void run();
 private:
-    void print_commands();
-    void get_input();
-    void append_text();
-    void start_new_line();
-    void save_to_file();
-    void load_from_file();
-    void print_to_console();
-    void search();
+    void print_commands(); //works correctly
+    void get_input(); // works correctly
+    void append_text(); // works correctly
+    void start_new_line(); // works correctly
+    void save_to_file(); // works correctly
+    void load_from_file(); // works correctly but can be optimised
+    void print_to_console(); // works correctly
+    void search(); // works correctly
     void insert();
-    void insert_with_replacement();
-    void delete_command();
-    void cut();
-    void paste();
-    void copy();
+    void insert_with_replacement(); // works when the text is inserted in the middle of the line, but falls when I try to insert more text then the capacity of the line
+    void delete_command(); // seems to be correct
+    void cut(); // works correctly
+    void paste(); // works correctly
+    void copy(); // works correctly
+    void save_state();
+    void undo(); // does not work with new line and in the end of the program there occures an error -...
+    void redo();
 
     int bufferSize;
-    int numberOfRaws;
+    int numberOfRows;
     int currentLineNum;
     int counter;
     char* input;
     char* cut_copy_paste;
     char** text;
     int cut_copy_paste_index;
+    char*** history;
+    int historyIndex;
 };
 TextEditor::TextEditor(int BufSize)
-    :bufferSize(BufSize), numberOfRaws(1), currentLineNum(0), counter(0), cut_copy_paste_index(0) {
+    :bufferSize(BufSize), numberOfRows(1), currentLineNum(0), counter(0), cut_copy_paste_index(0), historyIndex(0) {
     try {
         input = new char[bufferSize];
         cut_copy_paste = new char[bufferSize];
-        text = new char* [numberOfRaws];
+        text = new char* [numberOfRows];
         text[0] = new char[bufferSize];
         input[0] = '\0';
         text[0][0] = '\0';
+
+        history = new char** [3]; // trying
+        for (int i = 0; i < 3; ++i) {
+            history[i] = nullptr;
+        }
+        
     }
     catch (const bad_alloc& e) {
         cerr << "Memory allocation failed: " << e.what() << ". Exiting..." << endl;
@@ -52,11 +63,21 @@ TextEditor::TextEditor(int BufSize)
     }
 }
 TextEditor::~TextEditor() {
-    for (int i = 0; i < numberOfRaws; i++) {
+    for (int i = 0; i < numberOfRows; i++) {
         delete[] text[i];
     }
     delete[] input;
     delete[] text;
+    delete[] cut_copy_paste;
+    for (int i = 0; i < 3; ++i) {
+        if (history[i] != nullptr) { // try to delete a part with nullptr
+            for (int j = 0; j < numberOfRows; ++j) {
+                delete[] history[i][j];
+            }
+            delete[] history[i];
+        }
+    }
+    delete[] history;
 }
 
 void TextEditor::print_commands() {
@@ -70,10 +91,11 @@ void TextEditor::print_commands() {
         << "7 - Search\n"
         << "8 - Delete\n"
         << "9 - Undo\n"
+        << "10 - Redo\n"
         << "11 - Cut\n"
         << "12 - Paste\n"
         << "13 - Copy\n"
-        << "14 - Insert the text by line and symbol index with replacement\n"
+        << "14 - Insert with replacement\n"
         << "15 - Exit\n";
 }
 
@@ -84,33 +106,34 @@ void TextEditor::get_input() {
 }
 
 void TextEditor::append_text() {
-    int LineNewLength = 0;
     system("CLS");
+    int LineNewLength = 0;
     cout << "Enter text to append:\n";
     get_input();
 
     LineNewLength = strlen(input) + strlen(text[currentLineNum]) + 1;
 
     try {
-        char* newLine = new char[LineNewLength];
-        strcpy_s(newLine, LineNewLength, text[currentLineNum]); 
-        strcat_s(newLine, LineNewLength, input); 
+        char* temporary = new char[LineNewLength];
+        strcpy_s(temporary, LineNewLength, text[currentLineNum]); 
+        strcat_s(temporary, LineNewLength, input); 
         delete[] text[currentLineNum];
-        text[currentLineNum] = newLine;
+        text[currentLineNum] = temporary;
     }
     catch (const bad_alloc& e) {
         cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
         exit(1);
     }
+    save_state();
 }
 
-void TextEditor::start_new_line() {
+void TextEditor::start_new_line() { // something is wrong here
     system("CLS");
     cout << "New line is started\n";
-    numberOfRaws++;
+    numberOfRows++;
     currentLineNum++;
     try {
-        char** newText = new char*[numberOfRaws];
+        char** newText = new char*[numberOfRows];
         int size = 0;
         for (int i = 0; i < currentLineNum; i++) {
             while (text[i][size] != '\0') {
@@ -131,6 +154,7 @@ void TextEditor::start_new_line() {
         cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
         exit(1);
     }
+    save_state();
 }
 
 void TextEditor::save_to_file(){
@@ -142,7 +166,7 @@ void TextEditor::save_to_file(){
 
     fopen_s(&file, input, "w");
     if (file != NULL) {
-        for (int i = 0; i < numberOfRaws; i++) {
+        for (int i = 0; i < numberOfRows; i++) {
             fputs(text[i], file);
             fputs("\n", file);
         }
@@ -152,72 +176,76 @@ void TextEditor::save_to_file(){
 }
 
 void TextEditor::load_from_file() {
-    char* mystring = new char[bufferSize];
     system("CLS");
     cout << "Enter the file name for loading:\n";
     get_input();
 
     FILE* file;
 
-    fopen_s(&file, input, "r");
-    if (file == NULL) {
+   
+    if (fopen_s(&file, input, "r") != 0 || file == NULL) {
         cout << "Error opening file!";
+        return;
     }
-    else {
-        while (fgets(mystring, bufferSize, file))
-        {
-            numberOfRaws++;
-            currentLineNum++;
 
-            mystring[strcspn(mystring, "\n")] = '\0';
+    char* temporary = new char[bufferSize];
 
-            try {
-                char** newText = new char* [numberOfRaws];
-                int size = 0;
-                for (int i = 0; i < currentLineNum; i++) {
-                    while (text[i][size] != '\0') {
-                        ++size;
-                    }
-                    newText[i] = new char[size + 1];
-                    memcpy(newText[i], text[i], size);
-                    newText[i][size] = '\0';
-                    delete[] text[i];
+    while (fgets(temporary, bufferSize, file))
+    {
+        numberOfRows++;
+        currentLineNum++;
+
+        temporary[strcspn(temporary, "\n")] = '\0';
+
+        try {
+            char** newText = new char* [numberOfRows];
+            int size = 0;
+            for (int i = 0; i < (currentLineNum); i++) {
+                while (text[i][size] != '\0') {
+                    ++size;
                 }
-                newText[currentLineNum] = new char[bufferSize];
-                newText[currentLineNum][0] = '\0';
-                memcpy(newText[currentLineNum], mystring, bufferSize);
-                delete[] text;
-                text = newText;
+                newText[i] = new char[size + 1];
+                memcpy(newText[i], text[i], size);
+                newText[i][size] = '\0';
+                delete[] text[i];
+            }
+            newText[currentLineNum] = new char[bufferSize];
+            newText[currentLineNum][0] = '\0';
+            memcpy(newText[currentLineNum], temporary, bufferSize);
+            delete[] text;
+            text = newText;
 
-            }
-            catch (const bad_alloc& e) {
-                cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
-                exit(1);
-            }
         }
-        fclose(file);
-        file = NULL;
+        catch (const bad_alloc& e) {
+            cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
+            exit(1);
+        }
     }
+    fclose(file);
+    file = NULL;
 }
 
 void TextEditor::print_to_console() {
     system("CLS");
     cout << "The current text is:\n";
-    for (int i = 0; i < numberOfRaws; i++) {
+    for (int i = 0; i < numberOfRows; i++) {
         
             cout << text[i] << endl;
         }
 }
 
 void TextEditor::search() {
-    int matchesNum = 0;
-    int matchBool = 0;
-    int substringLen = 0;
     system("CLS");
     cout << "Enter text to search:\n";
     get_input();
+
+    int matchesNum = 0;
+    int matchBool = 0;
+    int substringLen = 0;
+
     substringLen = strlen(input);
-    for (int i = 0; i < numberOfRaws; i++)
+
+    for (int i = 0; i < numberOfRows; i++)
     {
         char* currentLine = text[i];
         int lineLen = strlen(currentLine);
@@ -235,14 +263,14 @@ void TextEditor::search() {
             }
             if (matchBool) {
                 matchesNum += 1;
-                cout << "Text is present at this position:"<< i << " " <<j<<endl;
+                cout << "Text is present at this position:" << i << " " << j << endl;
             }
         }
     }
     cout << "Number of matches:" << matchesNum << endl;
 }
 
-void TextEditor::insert() {
+void TextEditor::insert() { // problems start when the new line is started
     char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
@@ -252,7 +280,7 @@ void TextEditor::insert() {
             continue;
         }
 
-        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+        if (line <= numberOfRows && line >= 0 && index >= 0) {
             cout << "Enter text to insert:\n";
             get_input();
             strcpy_s(temporary, bufferSize, text[line]);
@@ -270,9 +298,10 @@ void TextEditor::insert() {
     else {
         cout << "The entered line and index are incorrect.\n";
     }
+    save_state();
 }
 
-void TextEditor::insert_with_replacement() {
+void TextEditor::insert_with_replacement() { // problems start when the new line is started
     system("CLS");
     int line, index = 0;
     int size = 0;
@@ -281,7 +310,7 @@ void TextEditor::insert_with_replacement() {
         while (getchar() != '\n') {
             continue;
         }
-        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+        if (line <= numberOfRows && line >= 0 && index >= 0) {
             cout << "Enter text to insert:\n";
             get_input();
         }   
@@ -290,18 +319,18 @@ void TextEditor::insert_with_replacement() {
     {
         text[line][index + i] = input[i];
     }
+    save_state();
 }
 
-void TextEditor::delete_command() {
+void TextEditor::delete_command() {// wrong when the new line is started
     system("CLS");
     int line, index, num = 0;
-    //int counter = 0;              
     cout << "Choose line, index and number of symbols:\n";
     if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
         while (getchar() != '\n') {
             continue;
         }
-        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+        if (line <= numberOfRows && line >= 0 && index >= 0 && num <= strlen(text[line]) - index) {
             while (text[line][counter] != '\0') {
                 counter++;
             }
@@ -312,15 +341,16 @@ void TextEditor::delete_command() {
             counter = 0;
         }
         else {
-            cout << "The entered line and index are incorrect.\n";
+            cout << "The entered line, index or number of symbols are incorrect.\n";
         }
     }
     else {
-        cout << "The entered line and index are incorrect.\n";
+        cout << "The entered line, index or number of symbols are incorrect.\n";
     }
+    save_state();
 }
 
-void TextEditor::cut() {
+void TextEditor::cut() {//wrong when the new line is started
     system("CLS");
     int line, index, num = 0;
     cout << "Choose line, index and number of symbols:\n";
@@ -329,7 +359,8 @@ void TextEditor::cut() {
             continue;
         }
 
-        if (line <= numberOfRaws && line >= 0 && index >= 0) {
+        if (line <= numberOfRows && line >= 0 && index >= 0 && strlen(text[line]) >= num) {
+            // I created the counter to know where the end of the string is
             while (text[line][counter] != '\0') {
                 counter++;
             }
@@ -348,15 +379,16 @@ void TextEditor::cut() {
             counter = 0;
         }
         else {
-            cout << "The entered line and index are incorrect.\n";
+            cout << "The entered line, index or number of symbols are incorrect.\n";
         }
     }
     else {
-        cout << "The entered line and index are incorrect.\n";
+        cout << "The entered line, index or number of symbols are incorrect.\n";
     }
+    save_state();
 }
 
-void TextEditor::paste() {
+void TextEditor::paste() { //wrong when the new line is started
     char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
@@ -365,8 +397,7 @@ void TextEditor::paste() {
         while (getchar() != '\n') {
             continue;
         }
-
-        if (line <= numberOfRaws && line >= 0 && index >= 0 && cut_copy_paste != NULL) {
+        if (line <= numberOfRows && line >= 0 && index >= 0 && cut_copy_paste != NULL && index <= strlen(text[line])) {
             strcpy_s(temporary, bufferSize, text[line]);
             temporary[index] = '\0';
             strcat_s(temporary, bufferSize, cut_copy_paste);
@@ -384,6 +415,7 @@ void TextEditor::paste() {
         cout << "The entered line and index are incorrect.\n";
     }
     delete[] temporary;
+    save_state();
 }
 
 void TextEditor::copy() {
@@ -394,7 +426,7 @@ void TextEditor::copy() {
         while (getchar() != '\n') {
             continue;
         }
-        if (line <= numberOfRaws && line >= 0 && index >= 0)
+        if (line <= numberOfRows && line >= 0 && index >= 0 && num <= strlen(text[line]) - index)
         {
             while (cut_copy_paste_index != num) {
                 cut_copy_paste[cut_copy_paste_index] = text[line][index + cut_copy_paste_index];
@@ -404,17 +436,69 @@ void TextEditor::copy() {
             cut_copy_paste_index = 0;
         }
         else {
-            cout << "The entered line and index are incorrect.\n";
+            cout << "The entered line, index or number of symbols are incorrect.\n";
         }
     }
     else {
-        cout << "The entered line and index are incorrect.\n";
+        cout << "The entered line, index or number of symbols are incorrect.\n";
     }
+}
+
+void TextEditor::save_state() {
+    if (historyIndex == 3) {
+        for (int j = 0; j < numberOfRows; ++j) {
+            delete[] history[0][j];
+        }
+        delete[] history[0];
+
+        history[0] = history[1];
+        history[1] = history[2];
+        history[2] = nullptr;
+
+        historyIndex = 2;
+    }
+    history[historyIndex] = new char*[numberOfRows];
+    for (int i = 0; i < numberOfRows; i++) {
+        history[historyIndex][i] = new char[bufferSize];
+        strcpy_s(history[historyIndex][i], bufferSize, text[i]);
+    }
+    historyIndex++;
+}
+
+void TextEditor::undo() { //works until the new line is started
+    if (historyIndex > 0) {
+        --historyIndex;
+        for (int i = 0; i < numberOfRows; ++i) {
+            delete[] text[i];
+        }
+        delete[] text;
+       text = new char*[numberOfRows];
+        for (int i = 0; i < numberOfRows; ++i) {
+            text[i] = new char[bufferSize];
+            strcpy_s(text[i], bufferSize, history[historyIndex-1][i]);
+        }
+    }
+}
+
+void TextEditor::redo() {
+    if (historyIndex < 3 && history[historyIndex + 1] != nullptr) {
+        for (int i = 0; i < numberOfRows; ++i) {
+            delete[] text[i];
+        }
+        delete[] text;
+        text = new char* [numberOfRows];
+        for (int i = 0; i < numberOfRows; ++i) {
+            text[i] = new char[bufferSize];
+            strcpy_s(text[i], bufferSize, history[historyIndex][i]);
+        }
+    }
+    historyIndex++;
 }
 
 
 
 void TextEditor::run() {
+    save_state();
     while (true) {
         print_commands();
         get_input();
@@ -445,10 +529,10 @@ void TextEditor::run() {
                 delete_command();
                 break;
             case 9:
-                // implemented command
+                undo();
                 break;
             case 10:
-                // implemented command
+                redo();
                 break;
             case 11:
                 cut();
