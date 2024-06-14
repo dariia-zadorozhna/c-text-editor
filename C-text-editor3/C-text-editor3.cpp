@@ -21,7 +21,7 @@ private:
     void print_to_console(); // works correctly
     void search(); // works correctly
     void insert(); // works correctly
-    void insert_with_replacement(); // works when the text is inserted in the middle of the line, but falls when I try to insert more text then the capacity of the line
+    void insert_with_replacement(); // works correctly
     void delete_command(); // seems to be correct
     void cut(); // works correctly
     void paste(); // works correctly
@@ -72,9 +72,9 @@ TextEditor::~TextEditor() {
     delete[] cut_copy_paste;
     for (int i = 0; i < 3; ++i) {
         if (history[i] != nullptr) {
-            //for (int j = 0; j < numberOfRows; ++j) {
-            //    delete[] history[i][j];
-            //}
+            for (int j = 0; j < numberOfRowsHistory[i]; ++j) { // corrected this
+                delete[] history[i][j];
+            }
             delete[] history[i];
         }
     }
@@ -103,7 +103,6 @@ void TextEditor::print_commands() {
 void TextEditor::get_input() {
     fgets(input, bufferSize, stdin);
     input[strcspn(input, "\n")] = '\0';
-
 }
 
 
@@ -317,10 +316,16 @@ void TextEditor::insert_with_replacement() {
             get_input();
         }   
     }
-    for (int i = 0; i < strlen(input); i++) 
-    {
-        text[line][index + i] = input[i];
+    if (strlen(text[line]) >= index + strlen(input)) {
+        for (int i = 0; i < strlen(input); i++)
+        {
+            text[line][index + i] = input[i];
+        }
     }
+    else {
+        cout << "The input text is too large for this line:(\n";
+    }
+    
     save_state();
 }
 
