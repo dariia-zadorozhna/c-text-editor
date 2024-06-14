@@ -20,15 +20,15 @@ private:
     void load_from_file(); // works correctly but can be optimised
     void print_to_console(); // works correctly
     void search(); // works correctly
-    void insert();
+    void insert(); // works correctly
     void insert_with_replacement(); // works when the text is inserted in the middle of the line, but falls when I try to insert more text then the capacity of the line
     void delete_command(); // seems to be correct
     void cut(); // works correctly
     void paste(); // works correctly
     void copy(); // works correctly
-    void save_state();
-    void undo(); // does not work with new line and in the end of the program there occures an error -...
-    void redo();
+    void save_state(); // works correctly
+    void undo(); // works correctly
+    void redo(); // works correctly
 
     int bufferSize;
     int numberOfRows;
@@ -37,25 +37,26 @@ private:
     char* input;
     char* cut_copy_paste;
     char** text;
+    char* numberOfRowsHistory;
     int cut_copy_paste_index;
     char*** history;
     int historyIndex;
 };
 TextEditor::TextEditor(int BufSize)
-    :bufferSize(BufSize), numberOfRows(1), currentLineNum(0), counter(0), cut_copy_paste_index(0), historyIndex(0) {
+    :bufferSize(BufSize), numberOfRows(1), currentLineNum(0), counter(0), cut_copy_paste_index(0), historyIndex(0){
     try {
         input = new char[bufferSize];
         cut_copy_paste = new char[bufferSize];
         text = new char* [numberOfRows];
         text[0] = new char[bufferSize];
+        numberOfRowsHistory = new char[4];
         input[0] = '\0';
         text[0][0] = '\0';
 
-        history = new char** [3]; // trying
-        for (int i = 0; i < 3; ++i) {
+        history = new char** [4]; 
+        for (int i = 0; i < 4; ++i) {
             history[i] = nullptr;
         }
-        
     }
     catch (const bad_alloc& e) {
         cerr << "Memory allocation failed: " << e.what() << ". Exiting..." << endl;
@@ -70,10 +71,10 @@ TextEditor::~TextEditor() {
     delete[] text;
     delete[] cut_copy_paste;
     for (int i = 0; i < 3; ++i) {
-        if (history[i] != nullptr) { // try to delete a part with nullptr
-            for (int j = 0; j < numberOfRows; ++j) {
-                delete[] history[i][j];
-            }
+        if (history[i] != nullptr) {
+            //for (int j = 0; j < numberOfRows; ++j) {
+            //    delete[] history[i][j];
+            //}
             delete[] history[i];
         }
     }
@@ -105,6 +106,7 @@ void TextEditor::get_input() {
 
 }
 
+
 void TextEditor::append_text() {
     system("CLS");
     int LineNewLength = 0;
@@ -127,7 +129,7 @@ void TextEditor::append_text() {
     save_state();
 }
 
-void TextEditor::start_new_line() { // something is wrong here
+void TextEditor::start_new_line() { 
     system("CLS");
     cout << "New line is started\n";
     numberOfRows++;
@@ -270,7 +272,7 @@ void TextEditor::search() {
     cout << "Number of matches:" << matchesNum << endl;
 }
 
-void TextEditor::insert() { // problems start when the new line is started
+void TextEditor::insert() { 
     char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
@@ -301,7 +303,7 @@ void TextEditor::insert() { // problems start when the new line is started
     save_state();
 }
 
-void TextEditor::insert_with_replacement() { // problems start when the new line is started
+void TextEditor::insert_with_replacement() { 
     system("CLS");
     int line, index = 0;
     int size = 0;
@@ -322,7 +324,7 @@ void TextEditor::insert_with_replacement() { // problems start when the new line
     save_state();
 }
 
-void TextEditor::delete_command() {// wrong when the new line is started
+void TextEditor::delete_command() {
     system("CLS");
     int line, index, num = 0;
     cout << "Choose line, index and number of symbols:\n";
@@ -350,7 +352,7 @@ void TextEditor::delete_command() {// wrong when the new line is started
     save_state();
 }
 
-void TextEditor::cut() {//wrong when the new line is started
+void TextEditor::cut() {
     system("CLS");
     int line, index, num = 0;
     cout << "Choose line, index and number of symbols:\n";
@@ -388,7 +390,7 @@ void TextEditor::cut() {//wrong when the new line is started
     save_state();
 }
 
-void TextEditor::paste() { //wrong when the new line is started
+void TextEditor::paste() { 
     char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
@@ -445,34 +447,37 @@ void TextEditor::copy() {
 }
 
 void TextEditor::save_state() {
-    if (historyIndex == 3) {
-        for (int j = 0; j < numberOfRows; ++j) {
-            delete[] history[0][j];
-        }
+    if (historyIndex == 4) {
         delete[] history[0];
 
         history[0] = history[1];
         history[1] = history[2];
-        history[2] = nullptr;
+        history[2] = history[3];
+        history[3] = nullptr;
 
-        historyIndex = 2;
+        historyIndex = 3;
     }
     history[historyIndex] = new char*[numberOfRows];
     for (int i = 0; i < numberOfRows; i++) {
         history[historyIndex][i] = new char[bufferSize];
         strcpy_s(history[historyIndex][i], bufferSize, text[i]);
     }
+    numberOfRowsHistory[historyIndex] = numberOfRows;
     historyIndex++;
 }
 
-void TextEditor::undo() { //works until the new line is started
+void TextEditor::undo() { 
+    system("CLS");
     if (historyIndex > 0) {
         --historyIndex;
         for (int i = 0; i < numberOfRows; ++i) {
             delete[] text[i];
         }
         delete[] text;
-       text = new char*[numberOfRows];
+
+        numberOfRows = numberOfRowsHistory[historyIndex - 1]; //changing the current number of rows to the new number
+        currentLineNum = numberOfRows - 1;
+        text = new char* [numberOfRows];
         for (int i = 0; i < numberOfRows; ++i) {
             text[i] = new char[bufferSize];
             strcpy_s(text[i], bufferSize, history[historyIndex-1][i]);
@@ -481,11 +486,15 @@ void TextEditor::undo() { //works until the new line is started
 }
 
 void TextEditor::redo() {
-    if (historyIndex < 3 && history[historyIndex + 1] != nullptr) {
+    system("CLS");
+    if (historyIndex < 4 && history[historyIndex + 1] != nullptr) {
         for (int i = 0; i < numberOfRows; ++i) {
             delete[] text[i];
         }
         delete[] text;
+
+        numberOfRows = numberOfRowsHistory[historyIndex];
+        currentLineNum = numberOfRows - 1;
         text = new char* [numberOfRows];
         for (int i = 0; i < numberOfRows; ++i) {
             text[i] = new char[bufferSize];
@@ -498,7 +507,6 @@ void TextEditor::redo() {
 
 
 void TextEditor::run() {
-    save_state();
     while (true) {
         print_commands();
         get_input();
