@@ -1,0 +1,7 @@
+﻿  C-text-editor3.cpp
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(320,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(340,68): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(369,83): warning C4018: '>=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(407,96): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(436,68): warning C4018: '<=': signed/unsigned mismatch
+  C-text-editor3.vcxproj -> C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\Debug\C-text-editor3.exe

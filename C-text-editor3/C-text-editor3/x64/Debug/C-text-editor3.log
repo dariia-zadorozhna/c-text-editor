@@ -1,5 +1,6 @@
 ﻿  C-text-editor3.cpp
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(7,7): error C2143: syntax error: missing ';' before '<class-head>'
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(8,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
 C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(115,66): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(247,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(252,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  C-text-editor3.vcxproj -> C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\x64\Debug\C-text-editor3.exe

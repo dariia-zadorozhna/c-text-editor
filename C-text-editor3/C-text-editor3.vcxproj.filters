@@ -21,8 +21,16 @@
     <ClCompile Include="forlongtext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CaesarCipher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="longtext.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CaesarCipher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

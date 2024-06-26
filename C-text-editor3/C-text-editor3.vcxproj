@@ -129,9 +129,13 @@
   <ItemGroup>
     <ClCompile Include="C-text-editor3.cpp" />
     <ClCompile Include="forlongtext.cpp" />
+    <ClCompile Include="CaesarCipher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="longtext.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CaesarCipher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

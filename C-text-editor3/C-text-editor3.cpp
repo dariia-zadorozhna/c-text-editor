@@ -43,7 +43,7 @@ private:
     int historyIndex;
 };
 TextEditor::TextEditor(int BufSize)
-    :bufferSize(BufSize), numberOfRows(1), currentLineNum(0), counter(0), cut_copy_paste_index(0), historyIndex(0){
+    :bufferSize(BufSize), numberOfRows(1), currentLineNum(0), counter(0), cut_copy_paste_index(0), historyIndex(0) {
     try {
         input = new char[bufferSize];
         cut_copy_paste = new char[bufferSize];
@@ -53,7 +53,7 @@ TextEditor::TextEditor(int BufSize)
         input[0] = '\0';
         text[0][0] = '\0';
 
-        history = new char** [4]; 
+        history = new char** [4];
         for (int i = 0; i < 4; ++i) {
             history[i] = nullptr;
         }
@@ -84,7 +84,7 @@ TextEditor::~TextEditor() {
 void TextEditor::print_commands() {
     cout << "Choose a command:\n"
         << "1 - Append text symbols to the end\n"
-        << "2 - Start the new line\n"   
+        << "2 - Start the new line\n"
         << "3 - Save text to the file\n"
         << "4 - Load text from the file\n"
         << "5 - Print the current text to console\n"
@@ -116,8 +116,8 @@ void TextEditor::append_text() {
 
     try {
         char* temporary = new char[LineNewLength];
-        strcpy_s(temporary, LineNewLength, text[currentLineNum]); 
-        strcat_s(temporary, LineNewLength, input); 
+        strcpy_s(temporary, LineNewLength, text[currentLineNum]);
+        strcat_s(temporary, LineNewLength, input);
         delete[] text[currentLineNum];
         text[currentLineNum] = temporary;
     }
@@ -128,19 +128,19 @@ void TextEditor::append_text() {
     save_state();
 }
 
-void TextEditor::start_new_line() { 
+void TextEditor::start_new_line() {
     system("CLS");
     cout << "New line is started\n";
     numberOfRows++;
     currentLineNum++;
     try {
-        char** newText = new char*[numberOfRows];
+        char** newText = new char* [numberOfRows];
         int size = 0;
         for (int i = 0; i < currentLineNum; i++) {
             while (text[i][size] != '\0') {
                 ++size;
             }
-            newText[i] = new char[size + 1];  
+            newText[i] = new char[size + 1];
             memcpy(newText[i], text[i], size);
             newText[i][size] = '\0';
             delete[] text[i];
@@ -149,8 +149,8 @@ void TextEditor::start_new_line() {
         newText[currentLineNum][0] = '\0';
         delete[] text;
         text = newText;
-        
-    }   
+
+    }
     catch (const bad_alloc& e) {
         cerr << "Memory reallocation failed: " << e.what() << ". Exiting..." << endl;
         exit(1);
@@ -158,7 +158,7 @@ void TextEditor::start_new_line() {
     save_state();
 }
 
-void TextEditor::save_to_file(){
+void TextEditor::save_to_file() {
     system("CLS");
     cout << "Enter the file name for saving: \n";
     get_input();
@@ -183,7 +183,7 @@ void TextEditor::load_from_file() {
 
     FILE* file;
 
-   
+
     if (fopen_s(&file, input, "r") != 0 || file == NULL) {
         cout << "Error opening file!";
         return;
@@ -230,9 +230,9 @@ void TextEditor::print_to_console() {
     system("CLS");
     cout << "The current text is:\n";
     for (int i = 0; i < numberOfRows; i++) {
-        
-            cout << text[i] << endl;
-        }
+
+        cout << text[i] << endl;
+    }
 }
 
 void TextEditor::search() {
@@ -271,11 +271,11 @@ void TextEditor::search() {
     cout << "Number of matches:" << matchesNum << endl;
 }
 
-void TextEditor::insert() { 
+void TextEditor::insert() {
     char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
-    cout <<"Choose line and index:\n";
+    cout << "Choose line and index:\n";
     if ((scanf_s("%d %d", &line, &index)) == 2) {
         while (getchar() != '\n') {
             continue;
@@ -302,7 +302,7 @@ void TextEditor::insert() {
     save_state();
 }
 
-void TextEditor::insert_with_replacement() { 
+void TextEditor::insert_with_replacement() {
     system("CLS");
     int line, index = 0;
     int size = 0;
@@ -314,7 +314,7 @@ void TextEditor::insert_with_replacement() {
         if (line <= numberOfRows && line >= 0 && index >= 0) {
             cout << "Enter text to insert:\n";
             get_input();
-        }   
+        }
     }
     if (strlen(text[line]) >= index + strlen(input)) {
         for (int i = 0; i < strlen(input); i++)
@@ -325,7 +325,7 @@ void TextEditor::insert_with_replacement() {
     else {
         cout << "The input text is too large for this line:(\n";
     }
-    
+
     save_state();
 }
 
@@ -395,7 +395,7 @@ void TextEditor::cut() {
     save_state();
 }
 
-void TextEditor::paste() { 
+void TextEditor::paste() {
     char* temporary = new char[bufferSize];
     system("CLS");
     int line, index;
@@ -409,7 +409,7 @@ void TextEditor::paste() {
             temporary[index] = '\0';
             strcat_s(temporary, bufferSize, cut_copy_paste);
             strcat_s(temporary, bufferSize, text[line] + index);
-            delete[] text[line]; 
+            delete[] text[line];
             text[line] = new char[bufferSize];
             strcpy_s(text[line], bufferSize, temporary);
             cout << "New line is: " << text[line] << endl;
@@ -462,7 +462,7 @@ void TextEditor::save_state() {
 
         historyIndex = 3;
     }
-    history[historyIndex] = new char*[numberOfRows];
+    history[historyIndex] = new char* [numberOfRows];
     for (int i = 0; i < numberOfRows; i++) {
         history[historyIndex][i] = new char[bufferSize];
         strcpy_s(history[historyIndex][i], bufferSize, text[i]);
@@ -471,7 +471,7 @@ void TextEditor::save_state() {
     historyIndex++;
 }
 
-void TextEditor::undo() { 
+void TextEditor::undo() {
     system("CLS");
     if (historyIndex > 0) {
         --historyIndex;
@@ -485,7 +485,7 @@ void TextEditor::undo() {
         text = new char* [numberOfRows];
         for (int i = 0; i < numberOfRows; ++i) {
             text[i] = new char[bufferSize];
-            strcpy_s(text[i], bufferSize, history[historyIndex-1][i]);
+            strcpy_s(text[i], bufferSize, history[historyIndex - 1][i]);
         }
     }
 }
@@ -517,54 +517,54 @@ void TextEditor::run() {
         get_input();
         int command = atoi(input);
         switch (command) {
-            case 1:
-                append_text();
-                break;
-            case 2:
-                start_new_line();
-                break;
-            case 3:
-                save_to_file();
-                break;
-            case 4:
-                load_from_file();
-                break;
-            case 5:
-                print_to_console();
-                break;
-            case 6:
-                insert();
-                break;
-            case 7:
-                search();
-                break;
-            case 8:
-                delete_command();
-                break;
-            case 9:
-                undo();
-                break;
-            case 10:
-                redo();
-                break;
-            case 11:
-                cut();
-                break;
-            case 12:
-                paste();
-                break;
-            case 13:
-                copy();
-                break;
-            case 14:
-                insert_with_replacement();
-                break;
-            case 15:
-                system("CLS");
-                cout << "Exiting...\n";
-                return;
-            default:
-                cout << "Invalid command. Try again:\n";
+        case 1:
+            append_text();
+            break;
+        case 2:
+            start_new_line();
+            break;
+        case 3:
+            save_to_file();
+            break;
+        case 4:
+            load_from_file();
+            break;
+        case 5:
+            print_to_console();
+            break;
+        case 6:
+            insert();
+            break;
+        case 7:
+            search();
+            break;
+        case 8:
+            delete_command();
+            break;
+        case 9:
+            undo();
+            break;
+        case 10:
+            redo();
+            break;
+        case 11:
+            cut();
+            break;
+        case 12:
+            paste();
+            break;
+        case 13:
+            copy();
+            break;
+        case 14:
+            insert_with_replacement();
+            break;
+        case 15:
+            system("CLS");
+            cout << "Exiting...\n";
+            return;
+        default:
+            cout << "Invalid command. Try again:\n";
         }
     }
 }
