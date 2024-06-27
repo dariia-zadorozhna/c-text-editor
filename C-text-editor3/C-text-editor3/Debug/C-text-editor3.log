@@ -1,7 +1,15 @@
 ﻿  C-text-editor3.cpp
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(320,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(340,68): warning C4018: '<=': signed/unsigned mismatch
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(369,83): warning C4018: '>=': signed/unsigned mismatch
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(407,96): warning C4018: '<=': signed/unsigned mismatch
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(436,68): warning C4018: '<=': signed/unsigned mismatch
-  C-text-editor3.vcxproj -> C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\Debug\C-text-editor3.exe
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(340,13): error C3861: 'get_input': identifier not found
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(343,45): error C2065: 'input': undeclared identifier
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(370,13): error C3861: 'get_input': identifier not found
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(373,46): error C2065: 'input': undeclared identifier
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(374,36): error C2065: 'input': undeclared identifier
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(376,37): error C2065: 'input': undeclared identifier
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(394,68): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(423,83): warning C4018: '>=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(461,96): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(490,68): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(625,13): error C2561: 'main': function must return a value
+  C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(572,5):
+  see declaration of 'main'
+  
