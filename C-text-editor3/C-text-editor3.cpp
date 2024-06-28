@@ -3,8 +3,8 @@
 #include <cstring>
 #include <iostream>
 #include <windows.h>
+#include <sys/stat.h>
 using namespace std;
-
 
 
 class CaesarCipher {
@@ -139,29 +139,29 @@ void TextEditor::get_input() {
 }
 
 void TextEditor::forAppend() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Enter text to append:\n";
     get_input();
 }
 
 void TextEditor::forStartNewLine() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "New line is started\n";
 }
 
 void TextEditor::forPrintToConsole() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "The current text is:\n";
 }
 
 void TextEditor::forSearch() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Enter text to search:\n";
     get_input();
 }
 
 void TextEditor::forInsert() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Choose line and index:\n";
     if ((scanf_s("%d %d", &line, &index)) == 2) {
         while (getchar() != '\n') {
@@ -182,7 +182,7 @@ void TextEditor::forInsert() {
 }
 
 void TextEditor::forInsertWithReplacement() {
-    system("CLS");
+    /*system("CLS");*/
     int size = 0;
     cout << "Choose line and index:\n";
     if ((scanf_s("%d %d", &line, &index)) == 2) {
@@ -197,7 +197,7 @@ void TextEditor::forInsertWithReplacement() {
 }
 
 bool TextEditor::forDelete() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Choose line, index and number of symbols:\n";
     if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
         while (getchar() != '\n') {
@@ -218,7 +218,7 @@ bool TextEditor::forDelete() {
 }
 
 bool TextEditor::forCut() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Choose line, index and number of symbols:\n";
     if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
         while (getchar() != '\n') {
@@ -239,7 +239,7 @@ bool TextEditor::forCut() {
 }
 
 bool TextEditor::forPaste() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Choose line and index:\n";
     if ((scanf_s("%d %d", &line, &index)) == 2) {
         while (getchar() != '\n') {
@@ -260,7 +260,7 @@ bool TextEditor::forPaste() {
 }
 
 bool TextEditor::forCopy() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Choose line, index and number of symbols:\n";
     if ((scanf_s("%d %d %d", &line, &index, &num)) == 3) {
         while (getchar() != '\n') {
@@ -280,11 +280,20 @@ bool TextEditor::forCopy() {
     }
 }
 
+bool fileExists(const char* filename) {
+    struct stat buffer;
+    return (stat(filename, &buffer) == 0);
+}
+
 void TextEditor::encryptORdecrypt(const char* encryptORdecryptInput) {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Enter the input file:" << endl;
     get_input();
     inputFile = input;
+    if (!fileExists(inputFile)) {
+        std::cout << "Error: File does not exist!" << std::endl;
+        return;
+    }
 
     if (fopen_s(&file, inputFile, "r") != 0 || file == NULL) {
         cout << "Error opening file!" << endl;
@@ -324,6 +333,7 @@ void TextEditor::encryptORdecrypt(const char* encryptORdecryptInput) {
 
     delete[] temporary; 
 }
+
 
 class Text {
 public:
@@ -447,7 +457,7 @@ void Text::start_new_line() {
 }
 
 void Text::save_to_file() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Enter the file name for saving: \n";
     editor.get_input();
 
@@ -463,7 +473,7 @@ void Text::save_to_file() {
 }
 
 void Text::load_from_file() {
-    system("CLS");
+    /*system("CLS");*/
     cout << "Enter the file name for loading:\n";
     editor.get_input();
 
@@ -665,7 +675,7 @@ void Text::save_state() {
 }
 // no interaction with user
 void Text::undo() {
-    system("CLS");
+    /*system("CLS");*/
     if (historyIndex > 0) {
         --historyIndex;
         for (int i = 0; i < numberOfRows; ++i) {
@@ -684,7 +694,7 @@ void Text::undo() {
 }
 // no interaction with user
 void Text::redo() {
-    system("CLS");
+    /*system("CLS");*/
     if (historyIndex < 4 && history[historyIndex + 1] != nullptr) {
         for (int i = 0; i < numberOfRows; ++i) {
             delete[] text[i];
@@ -757,7 +767,7 @@ int main() {
             mytext.insert_with_replacement();
             break;
         case 15:
-            system("CLS");
+            /*system("CLS");*/
             cout << "Exiting...\n";
             return 0;
         case 16:
