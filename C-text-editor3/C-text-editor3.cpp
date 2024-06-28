@@ -149,25 +149,6 @@ void TextEditor::forStartNewLine() {
     cout << "New line is started\n";
 }
 
-//void TextEditor::forSaveToFile() {
-//    system("CLS");
-//    cout << "Enter the file name for saving: \n";
-//    get_input();
-//    if (fopen_s(&file, input, "w") != 0 || file == NULL) {
-//        cout << "Error opening file!";
-//    }
-//}
-////needs to be fixed
-//
-//void TextEditor::forLoadFromFile() {
-//    system("CLS");
-//    cout << "Enter the file name for loading:\n";
-//    get_input();
-//    if (fopen_s(&file, input, "r") != 0 || file == NULL) {
-//        cout << "Error opening file!";
-//    }
-//}
-//needs to be fixed
 void TextEditor::forPrintToConsole() {
     system("CLS");
     cout << "The current text is:\n";
