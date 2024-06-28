@@ -27,6 +27,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="longtext.txt" />
+    <Text Include="Encrypt.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CaesarCipher.h">

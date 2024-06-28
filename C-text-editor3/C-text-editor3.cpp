@@ -17,12 +17,14 @@ private:
 public:
     CaesarCipher(LPCWSTR path);
     ~CaesarCipher();
-    char* encrypt(char* text, int key);
-    char* decrypt(char* text, int key);
+    void encrypt(char* text, int key);
+    void decrypt(char* text, int key);
+    char* message;
     LPCWSTR dllPath;
 };
 
 CaesarCipher::CaesarCipher(LPCWSTR path) : dllPath(path) {
+    message = new char[256];
     hinstanceLibrary = LoadLibrary(dllPath);
     if (hinstanceLibrary != nullptr) {
         encryptFunction = (EncryptFunction)GetProcAddress(hinstanceLibrary, "encrypt");
@@ -42,19 +44,19 @@ CaesarCipher::~CaesarCipher() {
         FreeLibrary(hinstanceLibrary);
     }
 };
-char* CaesarCipher::encrypt(char* text, int key) {
+void CaesarCipher::encrypt(char* text, int key) {
     if (encryptFunction) {
-        char* message = encryptFunction(text, key);
-        return message;
+        message = encryptFunction(text, key);
+        cout << "Encrypted message:" << message << endl;
     }
     else {
         cerr << "Encrypt function not available." << endl;
     }
 }
-char* CaesarCipher::decrypt(char* text, int key) {
+void CaesarCipher::decrypt(char* text, int key) {
     if (decryptFunction) {
-        char* message = decryptFunction(text, key);
-        return message;
+        message = decryptFunction(text, key);
+        cout << "Decrypted message:" << message << endl;
     }
     else {
         cerr << "Decrypt function not available." << endl;
@@ -69,16 +71,16 @@ public:
     ~TextEditor();
 
     char* input;
-    int line, index, num;
+    int line, index, num, key;
     FILE* file;
+    char* inputFile;
+    char* outputFile;
+    char* textFromFile;
 
-    /* void run();*/
-    void print_commands(); //works correctly
-    void get_input(); // works correctly
+    void print_commands(); 
+    void get_input(); 
     void forAppend();
     void forStartNewLine();
-    void forSaveToFile();
-    void forLoadFromFile();
     void forPrintToConsole();
     void forSearch();
     void forInsert();
@@ -87,6 +89,7 @@ public:
     bool forCut();
     bool forPaste();
     bool forCopy();
+    void encryptORdecrypt(const char* encryptORdecryptInput);
     
 private:
     int bufferSize;
@@ -95,6 +98,7 @@ TextEditor::TextEditor() :bufferSize(256) {
     try {
         input = new char[bufferSize];
         input[0] = '\0';
+        textFromFile = new char[bufferSize];
     }
 
     catch (const bad_alloc& e) {
@@ -105,6 +109,7 @@ TextEditor::TextEditor() :bufferSize(256) {
 TextEditor::~TextEditor() {
 
     delete[] input;
+    delete[] textFromFile;
 }
 
 void TextEditor::print_commands() {
@@ -123,7 +128,9 @@ void TextEditor::print_commands() {
         << "12 - Paste\n"
         << "13 - Copy\n"
         << "14 - Insert with replacement\n"
-        << "15 - Exit\n";
+        << "15 - Exit\n"
+        << "16 - Encrypt\n"
+        << "17 - Decrypt\n";
 }
 
 void TextEditor::get_input() {
@@ -292,26 +299,72 @@ bool TextEditor::forCopy() {
     }
 }
 
+void TextEditor::encryptORdecrypt(const char* encryptORdecryptInput) {
+    system("CLS");
+    cout << "Enter the input file:" << endl;
+    get_input();
+    inputFile = input;
+
+    if (fopen_s(&file, inputFile, "r") != 0 || file == NULL) {
+        cout << "Error opening file!" << endl;
+    }
+
+    char* temporary = new char[bufferSize];
+    textFromFile[0] = '\0';
+
+    while (fgets(temporary, bufferSize, file)) {
+        temporary[strcspn(temporary, "\n")] = '\0';
+        strcat_s(textFromFile, bufferSize, temporary);
+    }
+
+    fclose(file);
+
+    cout << "Enter the key:" << endl;
+    get_input();
+    key = atoi(input);
+
+    CaesarCipher cipher(L"C:\\Users\\Дарія\\source\\repos\\C_text_editor\\C-text-editor3\\CaesarDLL.dll"); 
+    if (encryptORdecryptInput == "Encrypt") {
+        cipher.encrypt(textFromFile, key);
+    }
+    else if (encryptORdecryptInput == "Decrypt") {
+        cipher.decrypt(textFromFile, key);
+    }
+    
+    cout << "Enter the output file:" << endl;
+    get_input();
+    outputFile = input;
+
+    if (fopen_s(&file, outputFile, "w") != 0 || file == NULL) {
+        cout << "Error opening file!" << endl;
+    }
+    fputs(cipher.message, file);
+    fclose(file);
+
+    delete[] temporary; 
+}
+
 class Text {
 public:
     Text();
     ~Text();
-    void append_text(); // works correctly
-    void start_new_line(); // works correctly
-    void save_to_file(); // works correctly
-    void load_from_file(); // works correctly but can be optimised
-    void print_to_console(); // works correctly
-    void search(); // works correctly
+    void append_text(); 
+    void start_new_line();
+    void save_to_file(); 
+    void load_from_file(); 
+    void print_to_console(); 
+    void search(); 
     void insert(); 
     void insert_with_replacement(); 
-    void delete_command(); // seems to be correct
-    void cut(); // works correctly
-    void paste(); // works correctly
-    void copy(); // works correctly
-    void save_state(); // works correctly
-    void undo(); // works correctly
-    void redo(); // works correctly
+    void delete_command(); 
+    void cut(); 
+    void paste(); 
+    void copy(); 
+    void save_state(); 
+    void undo(); 
+    void redo(); 
     TextEditor editor;
+    
 private:
     
     int bufferSize;
@@ -324,6 +377,9 @@ private:
     int cut_copy_paste_index;
     char*** history;
     int historyIndex;
+    FILE* file;
+    FILE* inputFilePTR;
+    FILE* outputFilePTR;
 };
 Text::Text()
     :bufferSize(256), numberOfRows(1), currentLineNum(0), counter(0), cut_copy_paste_index(0), historyIndex(0) {
@@ -414,8 +470,6 @@ void Text::save_to_file() {
     cout << "Enter the file name for saving: \n";
     editor.get_input();
 
-    FILE* file;
-
     fopen_s(&file, editor.input, "w");
     if (file != NULL) {
         for (int i = 0; i < numberOfRows; i++) {
@@ -426,14 +480,11 @@ void Text::save_to_file() {
     fclose(file);
     file = NULL;
 }
-//needs to be fixed
+
 void Text::load_from_file() {
     system("CLS");
     cout << "Enter the file name for loading:\n";
     editor.get_input();
-
-    FILE* file;
-
 
     if (fopen_s(&file, editor.input, "r") != 0 || file == NULL) {
         cout << "Error opening file!";
@@ -476,7 +527,7 @@ void Text::load_from_file() {
     fclose(file);
     file = NULL;
 }
-//needs to be fixed
+
 void Text::print_to_console() {
     editor.forPrintToConsole();
     for (int i = 0; i < numberOfRows; i++) {
@@ -672,10 +723,6 @@ void Text::redo() {
 // no interaction with user
 
 
-//void TextEditor::run() {
-//    
-//}
-
 int main() {
     TextEditor editor;
     Text mytext;
@@ -732,9 +779,14 @@ int main() {
             system("CLS");
             cout << "Exiting...\n";
             return 0;
+        case 16:
+            editor.encryptORdecrypt("Encrypt");
+            break;
+        case 17:
+            editor.encryptORdecrypt("Decrypt");
+            break;
         default:
             cout << "Invalid command. Try again:\n";
         }
     }
-   /* editor.run();*/
 }

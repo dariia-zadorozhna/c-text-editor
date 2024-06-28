@@ -1,7 +1,5 @@
 ﻿  C-text-editor3.cpp
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(367,73): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(494,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(499,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(62,1): warning C4715: 'CaesarCipher::decrypt': not all control paths return a value
-C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(53,1): warning C4715: 'CaesarCipher::encrypt': not all control paths return a value
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(426,73): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(548,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\C-text-editor3.cpp(553,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   C-text-editor3.vcxproj -> C:\Users\Дарія\source\repos\C_text_editor\C-text-editor3\x64\Debug\C-text-editor3.exe

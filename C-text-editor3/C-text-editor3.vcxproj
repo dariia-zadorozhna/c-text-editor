@@ -132,6 +132,7 @@
     <ClCompile Include="CaesarCipher.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Encrypt.txt" />
     <Text Include="longtext.txt" />
   </ItemGroup>
   <ItemGroup>
