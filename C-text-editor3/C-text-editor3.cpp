@@ -26,17 +26,16 @@ public:
 CaesarCipher::CaesarCipher(LPCWSTR path) : dllPath(path) {
     message = new char[256];
     hinstanceLibrary = LoadLibrary(dllPath);
-    if (hinstanceLibrary != nullptr) {
-        encryptFunction = (EncryptFunction)GetProcAddress(hinstanceLibrary, "encrypt");
-        decryptFunction = (DecryptFunction)GetProcAddress(hinstanceLibrary, "decrypt");
-        if (!encryptFunction || !decryptFunction) {
-            std::cerr << "Failed to locate the functions in the DLL." << std::endl;
-            FreeLibrary(hinstanceLibrary);
-            hinstanceLibrary = nullptr;
-        }
+    if (hinstanceLibrary == nullptr) {
+        delete[] message;
+        throw std::runtime_error("Failed to load the DLL.");
     }
-    else {
-        std::cerr << "Failed to load the DLL." << std::endl;
+    encryptFunction = (EncryptFunction)GetProcAddress(hinstanceLibrary, "encrypt");
+    decryptFunction = (DecryptFunction)GetProcAddress(hinstanceLibrary, "decrypt");
+    if (!encryptFunction || !decryptFunction) {
+        hinstanceLibrary = nullptr;
+        delete[] message;
+        throw std::runtime_error("Failed to locate the functions in the DLL.");
     }
 };
 CaesarCipher::~CaesarCipher() {
