@@ -94,6 +94,7 @@ private:
     int bufferSize;
 };
 TextEditor::TextEditor() :bufferSize(256) {
+    CaesarCipher cipher(L"C:\\Users\\Дарія\\source\\repos\\C_text_editor\\C-text-editor3\\CaesarDLL.dll");
     try {
         input = new char[bufferSize];
         input[0] = '\0';
@@ -716,7 +717,6 @@ void Text::redo() {
 int main() {
     TextEditor editor;
     Text mytext;
-    CaesarCipher cipher(L"C:\\Users\\Дарія\\source\\repos\\C_text_editor\\C-text-editor3\\CaesarDLL.dll");
     
     while (true) {
         editor.print_commands();
