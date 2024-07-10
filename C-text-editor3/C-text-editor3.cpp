@@ -462,7 +462,6 @@ private:
     int bufferSize;
 };
 TextEditor::TextEditor() :bufferSize(256) {
-    CaesarCipher cipher(L"C:\\Users\\Дарія\\source\\repos\\C_text_editor\\C-text-editor3\\CaesarDLL.dll");
     try {
         input = new char[bufferSize];
         input[0] = '\0';
