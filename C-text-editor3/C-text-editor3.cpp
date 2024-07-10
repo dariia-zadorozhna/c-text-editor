@@ -704,25 +704,37 @@ void TextEditor::encryptORdecrypt(const char* encryptORdecryptInput) {
     get_input();
     key = atoi(input);
 
-    CaesarCipher cipher(L"C:\\Users\\Дарія\\source\\repos\\C_text_editor\\C-text-editor3\\CaesarDLL.dll"); 
-    if (encryptORdecryptInput == "Encrypt") {
-        cipher.encrypt(textFromFile, key);
+    try {
+        CaesarCipher cipher(L"C:\\Users\\Дарія\\source\\repos\\C_text_editor\\C-text-editor3\\CaesarDLL.dll");
+        if (encryptORdecryptInput == "Encrypt") {
+            cipher.encrypt(textFromFile, key);
+        }
+        else if (encryptORdecryptInput == "Decrypt") {
+            cipher.decrypt(textFromFile, key);
+        }
+
+        cout << "Enter the output file:" << endl;
+        get_input();
+        outputFile = input;
+
+        if (fopen_s(&file, outputFile, "w") != 0 || file == NULL) {
+            cout << "Error opening file!" << endl;
+        }
+        fputs(cipher.message, file);
+        fclose(file);
+
+        delete[] temporary;
     }
-    else if (encryptORdecryptInput == "Decrypt") {
-        cipher.decrypt(textFromFile, key);
+    catch (const std::runtime_error& e) {
+        std::wcerr << L"Runtime error: " << e.what() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::wcerr << L"Exception: " << e.what() << std::endl;
+    }
+    catch (...) {
+        std::wcerr << L"Unknown error occurred." << std::endl;
     }
     
-    cout << "Enter the output file:" << endl;
-    get_input();
-    outputFile = input;
-
-    if (fopen_s(&file, outputFile, "w") != 0 || file == NULL) {
-        cout << "Error opening file!" << endl;
-    }
-    fputs(cipher.message, file);
-    fclose(file);
-
-    delete[] temporary; 
 }
 
 void TextEditor::run() {
